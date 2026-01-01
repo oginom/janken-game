@@ -52,13 +52,13 @@ janken-game/
 > - 実際の動作確認はユーザーが行う
 
 ### フェーズ1: プロジェクトセットアップ
-- [ ] Vite + TypeScriptプロジェクト初期化
-- [ ] 必要なパッケージのインストール
+- [x] Vite + TypeScriptプロジェクト初期化
+- [x] 必要なパッケージのインストール
   - `three`
   - `@mediapipe/tasks-vision`
   - `@types/three`
-- [ ] 基本的なHTML構造作成
-- [ ] Vite設定(開発サーバー、ビルド設定)
+- [x] 基本的なHTML構造作成
+- [x] Vite設定(開発サーバー、ビルド設定)
 
 ### フェーズ2: 型定義と定数
 - [ ] `types/index.ts` - 全体で使用する型定義
