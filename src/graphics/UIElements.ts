@@ -3,6 +3,16 @@ import { assetLoader } from '../assets/AssetLoader';
 import { SCREEN } from '../utils/Constants';
 
 /**
+ * 画面座標(左上原点)をThree.js座標(中心原点)に変換
+ */
+function screenToThreeCoords(x: number, y: number): { x: number; y: number } {
+  return {
+    x: x - SCREEN.WIDTH / 2,
+    y: -(y - SCREEN.HEIGHT / 2),
+  };
+}
+
+/**
  * UI要素（ライフ、スコア）の描画管理
  */
 export class UIElements {
@@ -46,7 +56,8 @@ export class UIElements {
       });
 
       const sprite = new THREE.Sprite(material);
-      sprite.position.set(startX + i * spacing, startY, 1);
+      const coords = screenToThreeCoords(startX + i * spacing, startY);
+      sprite.position.set(coords.x, coords.y, 1);
       sprite.scale.set(heartSize, heartSize, 1);
 
       this.lifeSprites.push(sprite);

@@ -9,19 +9,19 @@ export class GameCamera {
 
   constructor() {
     // 2D描画用の正投影カメラを作成
-    // 座標系は画面ピクセルと同じにする（左上が原点）
-    const left = 0;
-    const right = SCREEN.WIDTH;
-    const top = 0;
-    const bottom = SCREEN.HEIGHT;
+    // 座標系: 左上が(0,0)、右下が(WIDTH, HEIGHT)
+    // OrthographicCamera(left, right, top, bottom, near, far)
+    // カメラの中心を画面中心に配置するため、-WIDTH/2 ~ WIDTH/2, -HEIGHT/2 ~ HEIGHT/2 の範囲を設定
+    const halfWidth = SCREEN.WIDTH / 2;
+    const halfHeight = SCREEN.HEIGHT / 2;
     const near = 0.1;
     const far = 1000;
 
     this.camera = new THREE.OrthographicCamera(
-      left,
-      right,
-      top,
-      bottom,
+      -halfWidth,  // left
+      halfWidth,   // right
+      halfHeight,  // top
+      -halfHeight, // bottom
       near,
       far
     );

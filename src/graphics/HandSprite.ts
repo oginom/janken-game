@@ -1,7 +1,17 @@
 import * as THREE from 'three';
 import type { HandType, HandPosition } from '../types';
 import { assetLoader } from '../assets/AssetLoader';
-import { ANIMATION } from '../utils/Constants';
+import { ANIMATION, SCREEN } from '../utils/Constants';
+
+/**
+ * 画面座標(左上原点)をThree.js座標(中心原点)に変換
+ */
+function screenToThreeCoords(x: number, y: number): { x: number; y: number } {
+  return {
+    x: x - SCREEN.WIDTH / 2,
+    y: -(y - SCREEN.HEIGHT / 2),
+  };
+}
 
 /**
  * 手のスプライト（プレイヤー・敵共通）
@@ -26,7 +36,8 @@ export class HandSprite {
     });
 
     this.sprite = new THREE.Sprite(material);
-    this.sprite.position.set(x, y, 0);
+    const coords = screenToThreeCoords(x, y);
+    this.sprite.position.set(coords.x, coords.y, 0);
     this.sprite.scale.set(size, size, 1);
   }
 
@@ -98,9 +109,10 @@ export class HandSprite {
    * 位置を設定
    */
   setPosition(x: number, y: number): void {
-    this.sprite.position.set(x, y, this.sprite.position.z);
+    const coords = screenToThreeCoords(x, y);
+    this.sprite.position.set(coords.x, coords.y, this.sprite.position.z);
     if (this.frameSprite) {
-      this.frameSprite.position.set(x, y, this.frameSprite.position.z);
+      this.frameSprite.position.set(coords.x, coords.y, this.frameSprite.position.z);
     }
   }
 
@@ -155,7 +167,7 @@ export class HandSprite {
     const easeOut = 1 - Math.pow(1 - progress, 3);
     const offset = Math.sin(easeOut * Math.PI) * ANIMATION.HAND_BOUNCE_HEIGHT;
 
-    this.sprite.position.y = this.bounceAnimation.startY - offset;
+    this.sprite.position.y = this.bounceAnimation.startY + offset; // Y座標反転のため+に変更
     if (this.frameSprite) {
       this.frameSprite.position.y = this.sprite.position.y;
     }

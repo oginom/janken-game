@@ -21,7 +21,7 @@ export class Background {
       transparent: false,
     });
     this.backgroundPlane = new THREE.Mesh(bgGeometry, bgMaterial);
-    this.backgroundPlane.position.set(SCREEN.WIDTH / 2, SCREEN.HEIGHT / 2, -10);
+    this.backgroundPlane.position.set(0, 0, -10); // 中心座標系なので(0,0)
 
     // オーバーレイプレーンの作成（白の半透明）
     const overlayGeometry = new THREE.PlaneGeometry(SCREEN.WIDTH, SCREEN.HEIGHT);
@@ -31,7 +31,7 @@ export class Background {
       opacity: BACKGROUND.OVERLAY_ALPHA,
     });
     this.overlayPlane = new THREE.Mesh(overlayGeometry, overlayMaterial);
-    this.overlayPlane.position.set(SCREEN.WIDTH / 2, SCREEN.HEIGHT / 2, -9);
+    this.overlayPlane.position.set(0, 0, -9); // 中心座標系なので(0,0)
   }
 
   /**
