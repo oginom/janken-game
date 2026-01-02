@@ -3,6 +3,7 @@ import { GameRenderer } from './graphics/Renderer';
 import { GameCamera } from './graphics/Camera';
 import { assetLoader } from './assets/AssetLoader';
 import { Scene } from './scenes/Scene';
+import { GameState } from './game/GameState';
 
 /**
  * アプリケーションのメインクラス
@@ -11,6 +12,7 @@ import { Scene } from './scenes/Scene';
 export class App {
   private renderer: GameRenderer;
   private camera: GameCamera;
+  private gameState: GameState;
   private currentScene: Scene | null = null;
   private lastTime: number = 0;
   private isRunning: boolean = false;
@@ -18,6 +20,7 @@ export class App {
   constructor(canvas: HTMLCanvasElement) {
     this.renderer = new GameRenderer(canvas);
     this.camera = new GameCamera();
+    this.gameState = new GameState();
   }
 
   /**
@@ -95,6 +98,13 @@ export class App {
       );
     }
   };
+
+  /**
+   * ゲーム状態を取得
+   */
+  getGameState(): GameState {
+    return this.gameState;
+  }
 
   /**
    * リソースを破棄
