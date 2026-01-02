@@ -2,6 +2,8 @@ import './style.css';
 import { App } from './app';
 import { TitleScene } from './scenes/TitleScene';
 import { GameScene } from './scenes/GameScene';
+import { GameOverScene } from './scenes/GameOverScene';
+import { settingsManager } from './utils/Settings';
 
 console.log('じゃんけんボクサー - 起動中...');
 
@@ -24,21 +26,54 @@ async function main() {
     // 初期化
     await app.init();
 
-    // タイトル画面を作成
-    const titleScene = new TitleScene(video);
-    titleScene.onStart(async () => {
-      console.log('ゲーム開始ボタンがクリックされました');
+    // ゲーム開始処理
+    const startGame = async () => {
+      console.log('ゲーム開始');
 
       // ゲーム状態をリセット
       const gameState = app.getGameState();
       gameState.reset();
       gameState.setPhase('playing');
 
-      // ゲームシーンを作成して切り替え
+      // ゲームシーンを作成
       const gameScene = new GameScene(video, gameState);
-      await app.changeScene(gameScene);
 
-      console.log('ゲームシーンに遷移しました');
+      // ゲームオーバー時の処理を設定
+      gameState.on('game-over', async (event) => {
+        console.log('ゲームオーバー！スコア:', event.data.score);
+
+        // ハイスコアを更新
+        settingsManager.saveHighScore(event.data.score);
+        const highScore = settingsManager.getHighScore();
+
+        // ゲームオーバー画面に遷移
+        const gameOverScene = new GameOverScene(video, event.data.score, highScore);
+
+        // 再挑戦ボタンのコールバック
+        gameOverScene.onRetry(async () => {
+          await startGame();
+        });
+
+        // タイトルへ戻るボタンのコールバック
+        gameOverScene.onTitle(async () => {
+          const titleScene = new TitleScene(video);
+          titleScene.onStart(async () => {
+            await startGame();
+          });
+          await app.changeScene(titleScene);
+        });
+
+        await app.changeScene(gameOverScene);
+      });
+
+      // ゲームシーンに切り替え
+      await app.changeScene(gameScene);
+    };
+
+    // タイトル画面を作成
+    const titleScene = new TitleScene(video);
+    titleScene.onStart(async () => {
+      await startGame();
     });
 
     // タイトル画面を表示
