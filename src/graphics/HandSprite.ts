@@ -20,10 +20,10 @@ export class HandSprite {
   private sprite: THREE.Sprite;
   private currentType: HandType;
   private frameSprite: THREE.Sprite | null = null;
+  private baseY: number; // アニメーションの基準となるY座標
   private bounceAnimation: {
     active: boolean;
     startTime: number;
-    startY: number;
   } | null = null;
 
   constructor(type: HandType, x: number, y: number, size: number = 80) {
@@ -45,6 +45,9 @@ export class HandSprite {
     const coords = screenToThreeCoords(x, y);
     this.sprite.position.set(coords.x, coords.y, 0);
     this.sprite.scale.set(size, size, 1);
+
+    // 基準Y座標を保存
+    this.baseY = coords.y;
   }
 
   /**
@@ -81,10 +84,15 @@ export class HandSprite {
    * 跳ねるアニメーションを開始
    */
   private startBounceAnimation(): void {
+    // アニメーション開始時に位置を基準位置にリセット
+    this.sprite.position.y = this.baseY;
+    if (this.frameSprite) {
+      this.frameSprite.position.y = this.baseY;
+    }
+
     this.bounceAnimation = {
       active: true,
       startTime: performance.now(),
-      startY: this.sprite.position.y,
     };
   }
 
@@ -133,6 +141,7 @@ export class HandSprite {
    */
   setPosition(x: number, y: number): void {
     const coords = screenToThreeCoords(x, y);
+    this.baseY = coords.y; // 基準Y座標を更新
     this.sprite.position.set(coords.x, coords.y, this.sprite.position.z);
     if (this.frameSprite) {
       this.frameSprite.position.set(coords.x, coords.y, this.frameSprite.position.z);
@@ -177,11 +186,11 @@ export class HandSprite {
     const progress = elapsed / (ANIMATION.HAND_BOUNCE_DURATION * 1000);
 
     if (progress >= 1) {
-      // アニメーション終了
-      this.sprite.position.y = this.bounceAnimation.startY;
+      // アニメーション終了 - 基準位置に戻す
+      this.sprite.position.y = this.baseY;
       this.bounceAnimation.active = false;
       if (this.frameSprite) {
-        this.frameSprite.position.y = this.bounceAnimation.startY;
+        this.frameSprite.position.y = this.baseY;
       }
       return;
     }
@@ -190,7 +199,7 @@ export class HandSprite {
     const easeOut = 1 - Math.pow(1 - progress, 3);
     const offset = Math.sin(easeOut * Math.PI) * ANIMATION.HAND_BOUNCE_HEIGHT;
 
-    this.sprite.position.y = this.bounceAnimation.startY + offset; // Y座標反転のため+に変更
+    this.sprite.position.y = this.baseY + offset; // Y座標反転のため+に変更
     if (this.frameSprite) {
       this.frameSprite.position.y = this.sprite.position.y;
     }
