@@ -5,6 +5,7 @@ import { UIElements } from '../graphics/UIElements';
 import { GameState } from '../game/GameState';
 import { EnemyManager } from '../game/EnemyManager';
 import { DifficultyManager } from '../game/DifficultyManager';
+import { CollisionDetector } from '../game/CollisionDetector';
 import type { HandType } from '../types';
 import { PLAYER_HAND_POSITION, GAME_CONFIG } from '../utils/Constants';
 
@@ -181,6 +182,31 @@ export class GameScene extends Scene {
 
     if (this.enemyManager) {
       this.enemyManager.update(deltaTime);
+
+      // 衝突判定
+      const enemies = this.enemyManager.getEnemies();
+      const collisions = CollisionDetector.checkCollisions(
+        this.leftHand,
+        this.rightHand,
+        enemies
+      );
+
+      // 衝突があった敵を削除（後ろから削除して配列のインデックスずれを防ぐ）
+      const indicesToRemove = collisions.map((c) => c.enemyIndex).sort((a, b) => b - a);
+
+      for (const collision of collisions) {
+        CollisionDetector.applyCollisionResult(
+          collision,
+          (points) => this.gameState.addScore(points),
+          (amount) => this.gameState.loseLife(amount),
+          () => this.difficultyManager.incrementDefeatedCount()
+        );
+      }
+
+      // 衝突した敵を削除
+      for (const index of indicesToRemove) {
+        this.enemyManager.removeEnemy(index);
+      }
     }
 
     // 敵の生成タイマー
