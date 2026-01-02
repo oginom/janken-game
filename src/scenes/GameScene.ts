@@ -3,6 +3,8 @@ import { Background } from '../graphics/Background';
 import { HandSprite } from '../graphics/HandSprite';
 import { UIElements } from '../graphics/UIElements';
 import { GameState } from '../game/GameState';
+import { EnemyManager } from '../game/EnemyManager';
+import { DifficultyManager } from '../game/DifficultyManager';
 import type { HandType } from '../types';
 import { PLAYER_HAND_POSITION, GAME_CONFIG } from '../utils/Constants';
 
@@ -15,15 +17,21 @@ export class GameScene extends Scene {
   private rightHand: HandSprite | null = null;
   private uiElements: UIElements | null = null;
   private gameState: GameState;
+  private enemyManager: EnemyManager | null = null;
+  private difficultyManager: DifficultyManager;
 
   // ダミー操作用の現在の手
   private currentLeftHand: HandType = 'rock';
   private currentRightHand: HandType = 'rock';
 
+  // 敵生成のタイマー
+  private spawnTimer: number = 0;
+
   constructor(video: HTMLVideoElement, gameState: GameState) {
     super();
     this.background = new Background(video);
     this.gameState = gameState;
+    this.difficultyManager = new DifficultyManager();
   }
 
   /**
@@ -74,8 +82,14 @@ export class GameScene extends Scene {
       }
     });
 
+    // 敵マネージャーを初期化
+    this.enemyManager = new EnemyManager(this.scene);
+
     // キーボードイベントリスナーを設定
     this.setupKeyboardControls();
+
+    // 最初の敵をすぐに生成
+    this.spawnNextEnemy();
 
     console.log('GameScene初期化完了');
   }
@@ -127,6 +141,29 @@ export class GameScene extends Scene {
   }
 
   /**
+   * 次の敵を生成
+   */
+  private spawnNextEnemy(): void {
+    if (!this.enemyManager) return;
+
+    const nextHand = this.difficultyManager.generateNextHand();
+    const speed = this.difficultyManager.getCurrentSpeed();
+
+    if (nextHand.leftHand) {
+      this.enemyManager.spawnEnemy(nextHand.leftHand, 'left', speed);
+    }
+
+    if (nextHand.rightHand) {
+      this.enemyManager.spawnEnemy(nextHand.rightHand, 'right', speed);
+    }
+
+    console.log(`敵を生成: 左=${nextHand.leftHand}, 右=${nextHand.rightHand}, 速度=${speed.toFixed(1)}`);
+
+    // スポーンタイマーをリセット
+    this.spawnTimer = 0;
+  }
+
+  /**
    * 更新処理
    */
   update(deltaTime: number): void {
@@ -140,6 +177,17 @@ export class GameScene extends Scene {
 
     if (this.rightHand) {
       this.rightHand.update(deltaTime);
+    }
+
+    if (this.enemyManager) {
+      this.enemyManager.update(deltaTime);
+    }
+
+    // 敵の生成タイマー
+    this.spawnTimer += deltaTime;
+    const interval = this.difficultyManager.getCurrentInterval();
+    if (this.spawnTimer >= interval) {
+      this.spawnNextEnemy();
     }
   }
 
@@ -166,6 +214,11 @@ export class GameScene extends Scene {
     if (this.rightHand) {
       this.scene.remove(this.rightHand.getSprite());
       this.rightHand = null;
+    }
+
+    if (this.enemyManager) {
+      this.enemyManager.dispose();
+      this.enemyManager = null;
     }
 
     if (this.uiElements) {
