@@ -1,6 +1,7 @@
 import './style.css';
 import { App } from './app';
 import { TitleScene } from './scenes/TitleScene';
+import { GameScene } from './scenes/GameScene';
 
 console.log('じゃんけんボクサー - 起動中...');
 
@@ -25,10 +26,19 @@ async function main() {
 
     // タイトル画面を作成
     const titleScene = new TitleScene(video);
-    titleScene.onStart(() => {
+    titleScene.onStart(async () => {
       console.log('ゲーム開始ボタンがクリックされました');
-      // TODO: フェーズ13でReadySceneに遷移
-      alert('次のフェーズで実装します: プレイ開始待機画面');
+
+      // ゲーム状態をリセット
+      const gameState = app.getGameState();
+      gameState.reset();
+      gameState.setPhase('playing');
+
+      // ゲームシーンを作成して切り替え
+      const gameScene = new GameScene(video, gameState);
+      await app.changeScene(gameScene);
+
+      console.log('ゲームシーンに遷移しました');
     });
 
     // タイトル画面を表示

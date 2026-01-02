@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { HandType, HandPosition } from '../types';
+import type { HandType } from '../types';
 import { assetLoader } from '../assets/AssetLoader';
 import { ANIMATION, SCREEN } from '../utils/Constants';
 
@@ -29,9 +29,15 @@ export class HandSprite {
   constructor(type: HandType, x: number, y: number, size: number = 80) {
     this.currentType = type;
 
+    // テクスチャを取得
+    const texture = assetLoader.getHandTexture(type);
+    if (!texture) {
+      console.error(`Hand texture for type "${type}" not found!`);
+    }
+
     // スプライトマテリアルの作成
     const material = new THREE.SpriteMaterial({
-      map: assetLoader.getHandTexture(type),
+      map: texture,
       transparent: true,
     });
 
@@ -50,13 +56,24 @@ export class HandSprite {
     this.currentType = type;
 
     // テクスチャを更新
+    const texture = assetLoader.getHandTexture(type);
+    if (!texture) {
+      console.error(`Hand texture for type "${type}" not found!`);
+      return;
+    }
+
     const material = this.sprite.material as THREE.SpriteMaterial;
-    material.map = assetLoader.getHandTexture(type);
+    material.map = texture;
     material.needsUpdate = true;
 
     // アニメーションを開始
     if (animate) {
       this.startBounceAnimation();
+    }
+
+    // フレームがある場合は更新
+    if (this.frameSprite) {
+      this.updateFrame();
     }
   }
 
@@ -100,8 +117,14 @@ export class HandSprite {
   private updateFrame(): void {
     if (!this.frameSprite) return;
 
+    const texture = assetLoader.getFrameTexture(this.currentType);
+    if (!texture) {
+      console.error(`Frame texture for type "${this.currentType}" not found!`);
+      return;
+    }
+
     const frameMaterial = this.frameSprite.material as THREE.SpriteMaterial;
-    frameMaterial.map = assetLoader.getFrameTexture(this.currentType);
+    frameMaterial.map = texture;
     frameMaterial.needsUpdate = true;
   }
 
@@ -147,7 +170,7 @@ export class HandSprite {
   /**
    * 更新処理（アニメーション）
    */
-  update(deltaTime: number): void {
+  update(_deltaTime: number): void {
     if (!this.bounceAnimation?.active) return;
 
     const elapsed = performance.now() - this.bounceAnimation.startTime;
