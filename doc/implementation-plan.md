@@ -61,14 +61,14 @@ janken-game/
 - [x] Vite設定(開発サーバー、ビルド設定)
 
 ### フェーズ2: 型定義と定数
-- [ ] `types/index.ts` - 全体で使用する型定義
-- [ ] `utils/Constants.ts` - ゲーム定数の定義
+- [x] `types/index.ts` - 全体で使用する型定義
+- [x] `utils/Constants.ts` - ゲーム定数の定義
   - 画面サイズ
   - 初期ライフ数
   - スコア加算値
   - 難易度テーブル
   - 色定義(手の種類ごと)
-- [ ] `utils/Settings.ts` - LocalStorage管理
+- [x] `utils/Settings.ts` - LocalStorage管理
 
 ### フェーズ3: アセット管理
 - [ ] `assets/placeholders/PlaceholderGenerator.ts` - Canvas APIで図形生成
