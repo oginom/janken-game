@@ -4,11 +4,11 @@ import type { DifficultyConfig } from '../types';
  * ゲーム全体で使用する定数
  */
 
-// 画面サイズ
+// 画面サイズ（スマホ縦持ち想定）
 export const SCREEN = {
-  WIDTH: 800,
-  HEIGHT: 600,
-  ASPECT_RATIO: 800 / 600,
+  WIDTH: 375,
+  HEIGHT: 667,
+  ASPECT_RATIO: 375 / 667,
 } as const;
 
 // ゲーム設定
@@ -78,18 +78,18 @@ export const HAND_COLORS = {
 
 // プレイヤーの手の位置
 export const PLAYER_HAND_POSITION = {
-  Y: 500, // 下部のY座標
-  LEFT_X: 200,
-  RIGHT_X: 600,
+  Y: 580, // 下部のY座標
+  LEFT_X: 100,
+  RIGHT_X: 275,
 } as const;
 
 // 敵の手の初期位置と範囲
 export const ENEMY_HAND_POSITION = {
   START_Y: -50, // 画面上部外側から開始
-  PREVIEW_Y: 50, // 予告表示のY座標
-  END_Y: 550, // プレイヤーの手の少し上
-  LEFT_X: 200,
-  RIGHT_X: 600,
+  PREVIEW_Y: 80, // 予告表示のY座標
+  END_Y: 520, // プレイヤーの手の少し上
+  LEFT_X: 100,
+  RIGHT_X: 275,
 } as const;
 
 // 敵の手の基本速度（ピクセル/秒）
