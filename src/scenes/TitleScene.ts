@@ -88,7 +88,7 @@ export class TitleScene extends Scene {
     // 注意書き
     const notice = document.createElement('p');
     notice.textContent =
-      'このゲームでは端末のカメラを利用します。\n次の画面で同意を押してください。';
+      'カメラON: ジェスチャー認識で操作\nカメラOFF: キーボードで操作 (1,2,3 = 左手 / 4,5,6 = 右手)\nグー・チョキ・パー';
     notice.style.color = '#ffffff';
     notice.style.fontSize = '14px';
     notice.style.textAlign = 'center';

@@ -6,8 +6,10 @@ import { GameState } from '../game/GameState';
 import { EnemyManager } from '../game/EnemyManager';
 import { DifficultyManager } from '../game/DifficultyManager';
 import { CollisionDetector } from '../game/CollisionDetector';
+import { HandTracker } from '../game/HandTracker';
 import type { HandType } from '../types';
 import { PLAYER_HAND_POSITION, GAME_CONFIG } from '../utils/Constants';
+import { settingsManager } from '../utils/Settings';
 
 /**
  * ゲームプレイ画面
@@ -20,19 +22,26 @@ export class GameScene extends Scene {
   private gameState: GameState;
   private enemyManager: EnemyManager | null = null;
   private difficultyManager: DifficultyManager;
+  private handTracker: HandTracker | null = null;
 
-  // ダミー操作用の現在の手
+  // 現在の手（カメラまたはキーボード操作）
   private currentLeftHand: HandType = 'rock';
   private currentRightHand: HandType = 'rock';
 
   // 敵生成のタイマー
   private spawnTimer: number = 0;
 
+  // カメラ使用フラグ
+  private usesCamera: boolean;
+  private video: HTMLVideoElement;
+
   constructor(video: HTMLVideoElement, gameState: GameState) {
     super();
+    this.video = video;
     this.background = new Background(video);
     this.gameState = gameState;
     this.difficultyManager = new DifficultyManager();
+    this.usesCamera = settingsManager.getCameraEnabled();
   }
 
   /**
@@ -90,8 +99,25 @@ export class GameScene extends Scene {
     // 敵マネージャーを初期化
     this.enemyManager = new EnemyManager(this.scene);
 
-    // キーボードイベントリスナーを設定
-    this.setupKeyboardControls();
+    // カメラが有効な場合、HandTrackerを初期化
+    if (this.usesCamera) {
+      try {
+        this.handTracker = new HandTracker(this.video);
+        await this.handTracker.init();
+        await this.handTracker.startCamera();
+        this.handTracker.start();
+        console.log('HandTracker初期化完了');
+      } catch (error) {
+        console.error('HandTracker初期化エラー:', error);
+        console.log('キーボード操作にフォールバック');
+        this.usesCamera = false;
+      }
+    }
+
+    // カメラが無効またはエラーの場合、キーボードイベントリスナーを設定
+    if (!this.usesCamera) {
+      this.setupKeyboardControls();
+    }
 
     // 最初の敵をすぐに生成
     this.spawnNextEnemy();
@@ -176,6 +202,24 @@ export class GameScene extends Scene {
       this.background.update();
     }
 
+    // カメラ使用時、HandTrackerから手の状態を取得
+    if (this.usesCamera && this.handTracker) {
+      const leftHandType = this.handTracker.getLeftHandType();
+      const rightHandType = this.handTracker.getRightHandType();
+
+      // 左手の更新
+      if (leftHandType && leftHandType !== this.currentLeftHand && this.leftHand) {
+        this.currentLeftHand = leftHandType;
+        this.leftHand.setHandType(leftHandType);
+      }
+
+      // 右手の更新
+      if (rightHandType && rightHandType !== this.currentRightHand && this.rightHand) {
+        this.currentRightHand = rightHandType;
+        this.rightHand.setHandType(rightHandType);
+      }
+    }
+
     if (this.leftHand) {
       this.leftHand.update(deltaTime);
     }
@@ -234,6 +278,12 @@ export class GameScene extends Scene {
    * 終了処理
    */
   dispose(): void {
+    // HandTrackerを破棄
+    if (this.handTracker) {
+      this.handTracker.dispose();
+      this.handTracker = null;
+    }
+
     // キーボードイベントリスナーを削除
     if ((this as any)._keydownListener) {
       window.removeEventListener('keydown', (this as any)._keydownListener);
