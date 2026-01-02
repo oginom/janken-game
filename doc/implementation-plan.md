@@ -71,12 +71,12 @@ janken-game/
 - [x] `utils/Settings.ts` - LocalStorage管理
 
 ### フェーズ3: アセット管理
-- [ ] `assets/placeholders/PlaceholderGenerator.ts` - Canvas APIで図形生成
+- [x] `assets/placeholders/PlaceholderGenerator.ts` - Canvas APIで図形生成
   - グー・チョキ・パーのシンプルな図形
   - ハート、空ハートの図形
   - 丸枠の図形(3色)
   - 背景用の単色画像
-- [ ] `assets/AssetLoader.ts` - アセット読み込み管理
+- [x] `assets/AssetLoader.ts` - アセット読み込み管理
   - 画像読み込み
   - テクスチャ作成
   - アセット切り替え機能(プレースホルダー⇔実画像)
