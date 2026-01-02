@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { HandSprite } from '../graphics/HandSprite';
 import type { HandType } from '../types';
-import { ENEMY_HAND_POSITION, ENEMY_BASE_SPEED } from '../utils/Constants';
+import { ENEMY_HAND_POSITION, ENEMY_BASE_SPEED, ENEMY_FALL_TIME } from '../utils/Constants';
 
 /**
  * 敵の手の情報
@@ -31,11 +31,17 @@ export class EnemyManager {
 
   /**
    * 敵の手を生成
+   * 速度に応じて出現Y座標を調整し、到達時間を一定にする
    */
   spawnEnemy(type: HandType, side: 'left' | 'right', speed: number = ENEMY_BASE_SPEED): void {
     const x = side === 'left' ? ENEMY_HAND_POSITION.LEFT_X : ENEMY_HAND_POSITION.RIGHT_X;
-    const startY = ENEMY_HAND_POSITION.START_Y;
     const targetY = ENEMY_HAND_POSITION.END_Y;
+
+    // 到達時間を一定にするため、速度に応じて出現Y座標を計算
+    // 移動距離 = 速度 × 時間
+    // startY = targetY - (speed × ENEMY_FALL_TIME)
+    const distance = speed * ENEMY_FALL_TIME;
+    const startY = targetY - distance;
 
     // 敵の手スプライトを作成
     const sprite = new HandSprite(type, x, startY);

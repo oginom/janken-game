@@ -69,6 +69,10 @@ export class GameScene extends Scene {
     // ゲーム状態の初期値でUIを更新
     this.uiElements.updateLives(this.gameState.getLives());
     this.uiElements.updateScore(this.gameState.getScore());
+    this.uiElements.updateLevel(
+      this.difficultyManager.getCurrentLevel(),
+      this.difficultyManager.getDefeatedCount()
+    );
 
     // ゲーム状態のイベントリスナーを設定
     this.gameState.on('lives-change', (event) => {
@@ -199,7 +203,16 @@ export class GameScene extends Scene {
           collision,
           (points) => this.gameState.addScore(points),
           (amount) => this.gameState.loseLife(amount),
-          () => this.difficultyManager.incrementDefeatedCount()
+          () => {
+            this.difficultyManager.incrementDefeatedCount();
+            // 難易度レベル表示を更新
+            if (this.uiElements) {
+              this.uiElements.updateLevel(
+                this.difficultyManager.getCurrentLevel(),
+                this.difficultyManager.getDefeatedCount()
+              );
+            }
+          }
         );
       }
 

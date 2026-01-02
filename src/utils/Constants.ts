@@ -95,6 +95,9 @@ export const ENEMY_HAND_POSITION = {
 // 敵の手の基本速度（ピクセル/秒）
 export const ENEMY_BASE_SPEED = 100;
 
+// 敵の手がプレイヤーに到達するまでの時間（秒）
+export const ENEMY_FALL_TIME = 5.0;
+
 // アニメーション設定
 export const ANIMATION = {
   HAND_BOUNCE_HEIGHT: 20, // 手が跳ねる高さ

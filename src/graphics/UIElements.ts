@@ -18,6 +18,7 @@ function screenToThreeCoords(x: number, y: number): { x: number; y: number } {
 export class UIElements {
   private lifeSprites: THREE.Sprite[] = [];
   private scoreText: HTMLDivElement;
+  private levelText: HTMLDivElement;
   private maxLives: number;
 
   constructor(maxLives: number) {
@@ -35,6 +36,19 @@ export class UIElements {
     this.scoreText.style.textShadow = '2px 2px 4px rgba(0, 0, 0, 0.8)';
     this.scoreText.style.zIndex = '1000';
     document.body.appendChild(this.scoreText);
+
+    // 難易度レベル表示用のHTML要素を作成
+    this.levelText = document.createElement('div');
+    this.levelText.style.position = 'absolute';
+    this.levelText.style.top = '40px';
+    this.levelText.style.right = '10px';
+    this.levelText.style.color = '#ffff00';
+    this.levelText.style.fontSize = '18px';
+    this.levelText.style.fontWeight = 'bold';
+    this.levelText.style.fontFamily = 'Arial, sans-serif';
+    this.levelText.style.textShadow = '2px 2px 4px rgba(0, 0, 0, 0.8)';
+    this.levelText.style.zIndex = '1000';
+    document.body.appendChild(this.levelText);
 
     // ライフ表示用のスプライトを作成
     this.createLifeSprites();
@@ -84,6 +98,13 @@ export class UIElements {
   }
 
   /**
+   * 難易度レベル表示を更新
+   */
+  updateLevel(level: number, defeatedCount: number): void {
+    this.levelText.textContent = `Level ${level} (${defeatedCount % 5}/5)`;
+  }
+
+  /**
    * ライフスプライトを取得
    */
   getLifeSprites(): THREE.Sprite[] {
@@ -105,6 +126,7 @@ export class UIElements {
       sprite.visible = visible;
     });
     this.scoreText.style.display = visible ? 'block' : 'none';
+    this.levelText.style.display = visible ? 'block' : 'none';
   }
 
   /**
@@ -118,6 +140,10 @@ export class UIElements {
 
     if (this.scoreText.parentElement) {
       this.scoreText.parentElement.removeChild(this.scoreText);
+    }
+
+    if (this.levelText.parentElement) {
+      this.levelText.parentElement.removeChild(this.levelText);
     }
   }
 }
