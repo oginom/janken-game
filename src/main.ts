@@ -1,135 +1,51 @@
 import './style.css';
-import * as THREE from 'three';
-import { assetLoader } from './assets/AssetLoader';
-import { GameRenderer } from './graphics/Renderer';
-import { GameCamera } from './graphics/Camera';
-import { Background } from './graphics/Background';
-import { HandSprite } from './graphics/HandSprite';
-import { UIElements } from './graphics/UIElements';
-import { PLAYER_HAND_POSITION, ENEMY_HAND_POSITION, GAME_CONFIG } from './utils/Constants';
+import { App } from './app';
+import { TitleScene } from './scenes/TitleScene';
 
 console.log('じゃんけんボクサー - 起動中...');
 
 /**
- * 簡易的な動作確認用のテストコード
- * フェーズ9で本格的なアプリケーションに置き換えます
+ * アプリケーションのエントリーポイント
  */
-async function initTest() {
-  console.log('テストモード: 初期化中...');
+async function main() {
+  try {
+    // キャンバスとビデオ要素を取得
+    const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
+    const video = document.getElementById('camera-feed') as HTMLVideoElement;
 
-  // キャンバスとビデオ要素を取得
-  const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
-  const video = document.getElementById('camera-feed') as HTMLVideoElement;
-
-  if (!canvas || !video) {
-    console.error('必要な要素が見つかりません');
-    return;
-  }
-
-  // アセットを読み込み
-  console.log('アセット読み込み中...');
-  await assetLoader.loadAll();
-  console.log('アセット読み込み完了');
-
-  // レンダラーとカメラを初期化
-  const renderer = new GameRenderer(canvas);
-  const camera = new GameCamera();
-  renderer.initialResize();
-
-  // シーンを作成
-  const scene = new THREE.Scene();
-
-  // 背景を追加
-  const background = new Background(video);
-  scene.add(background.getBackgroundPlane());
-  scene.add(background.getOverlayPlane());
-
-  // プレイヤーの手を追加（左右）
-  const playerLeftHand = new HandSprite(
-    'rock',
-    PLAYER_HAND_POSITION.LEFT_X,
-    PLAYER_HAND_POSITION.Y
-  );
-  const playerRightHand = new HandSprite(
-    'scissors',
-    PLAYER_HAND_POSITION.RIGHT_X,
-    PLAYER_HAND_POSITION.Y
-  );
-  scene.add(playerLeftHand.getSprite());
-  scene.add(playerRightHand.getSprite());
-
-  // 敵の手を追加（予告表示）
-  const enemyLeftHand = new HandSprite(
-    'paper',
-    ENEMY_HAND_POSITION.LEFT_X,
-    ENEMY_HAND_POSITION.PREVIEW_Y
-  );
-  const enemyRightHand = new HandSprite(
-    'rock',
-    ENEMY_HAND_POSITION.RIGHT_X,
-    ENEMY_HAND_POSITION.PREVIEW_Y
-  );
-  enemyLeftHand.addFrame();
-  enemyRightHand.addFrame();
-  scene.add(enemyLeftHand.getSprite());
-  if (enemyLeftHand.getFrameSprite()) {
-    scene.add(enemyLeftHand.getFrameSprite()!);
-  }
-  scene.add(enemyRightHand.getSprite());
-  if (enemyRightHand.getFrameSprite()) {
-    scene.add(enemyRightHand.getFrameSprite()!);
-  }
-
-  // UI要素を追加
-  const uiElements = new UIElements(GAME_CONFIG.INITIAL_LIVES);
-  uiElements.getLifeSprites().forEach((sprite) => {
-    scene.add(sprite);
-  });
-  uiElements.updateScore(0);
-  uiElements.updateLives(GAME_CONFIG.INITIAL_LIVES);
-
-  console.log('初期化完了');
-
-  // アニメーションループ
-  let lastTime = performance.now();
-  let testTimer = 0;
-  let handIndex = 0;
-  const handTypes: Array<'rock' | 'scissors' | 'paper'> = ['rock', 'scissors', 'paper'];
-
-  function animate() {
-    requestAnimationFrame(animate);
-
-    const currentTime = performance.now();
-    const deltaTime = (currentTime - lastTime) / 1000;
-    lastTime = currentTime;
-
-    // 2秒ごとに手を切り替えてアニメーションテスト
-    testTimer += deltaTime;
-    if (testTimer > 2) {
-      testTimer = 0;
-      handIndex = (handIndex + 1) % handTypes.length;
-      playerLeftHand.setHandType(handTypes[handIndex], true);
-      playerRightHand.setHandType(handTypes[(handIndex + 1) % handTypes.length], true);
+    if (!canvas || !video) {
+      throw new Error('必要な要素が見つかりません');
     }
 
-    // スプライトのアニメーション更新
-    playerLeftHand.update(deltaTime);
-    playerRightHand.update(deltaTime);
-    enemyLeftHand.update(deltaTime);
-    enemyRightHand.update(deltaTime);
+    // アプリケーションを作成
+    const app = new App(canvas);
 
-    // 背景更新
-    background.update();
+    // 初期化
+    await app.init();
 
-    // レンダリング
-    renderer.render(scene, camera.getCamera());
+    // タイトル画面を作成
+    const titleScene = new TitleScene(video);
+    titleScene.onStart(() => {
+      console.log('ゲーム開始ボタンがクリックされました');
+      // TODO: フェーズ13でReadySceneに遷移
+      alert('次のフェーズで実装します: プレイ開始待機画面');
+    });
+
+    // タイトル画面を表示
+    await app.changeScene(titleScene);
+
+    // アプリケーション開始
+    app.start();
+
+    // ウィンドウを閉じる時にリソースを破棄
+    window.addEventListener('beforeunload', () => {
+      app.dispose();
+    });
+  } catch (error) {
+    console.error('初期化エラー:', error);
+    alert(`エラーが発生しました: ${error instanceof Error ? error.message : String(error)}`);
   }
-
-  console.log('レンダリング開始');
-  animate();
 }
 
 // 初期化実行
-initTest().catch((error) => {
-  console.error('初期化エラー:', error);
-});
+main();
