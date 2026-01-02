@@ -1,0 +1,183 @@
+import * as THREE from 'three';
+import type { HandType, HandPosition } from '../types';
+import { assetLoader } from '../assets/AssetLoader';
+import { ANIMATION } from '../utils/Constants';
+
+/**
+ * 手のスプライト（プレイヤー・敵共通）
+ */
+export class HandSprite {
+  private sprite: THREE.Sprite;
+  private currentType: HandType;
+  private frameSprite: THREE.Sprite | null = null;
+  private bounceAnimation: {
+    active: boolean;
+    startTime: number;
+    startY: number;
+  } | null = null;
+
+  constructor(type: HandType, x: number, y: number, size: number = 80) {
+    this.currentType = type;
+
+    // スプライトマテリアルの作成
+    const material = new THREE.SpriteMaterial({
+      map: assetLoader.getHandTexture(type),
+      transparent: true,
+    });
+
+    this.sprite = new THREE.Sprite(material);
+    this.sprite.position.set(x, y, 0);
+    this.sprite.scale.set(size, size, 1);
+  }
+
+  /**
+   * 手の種類を変更
+   */
+  setHandType(type: HandType, animate: boolean = true): void {
+    if (this.currentType === type) return;
+
+    this.currentType = type;
+
+    // テクスチャを更新
+    const material = this.sprite.material as THREE.SpriteMaterial;
+    material.map = assetLoader.getHandTexture(type);
+    material.needsUpdate = true;
+
+    // アニメーションを開始
+    if (animate) {
+      this.startBounceAnimation();
+    }
+  }
+
+  /**
+   * 跳ねるアニメーションを開始
+   */
+  private startBounceAnimation(): void {
+    this.bounceAnimation = {
+      active: true,
+      startTime: performance.now(),
+      startY: this.sprite.position.y,
+    };
+  }
+
+  /**
+   * 丸枠を追加（敵の手用）
+   */
+  addFrame(): void {
+    if (this.frameSprite) return;
+
+    const frameMaterial = new THREE.SpriteMaterial({
+      map: assetLoader.getFrameTexture(this.currentType),
+      transparent: true,
+    });
+
+    this.frameSprite = new THREE.Sprite(frameMaterial);
+    this.frameSprite.scale.set(
+      this.sprite.scale.x * 1.3,
+      this.sprite.scale.y * 1.3,
+      1
+    );
+
+    // 親スプライトと同じ位置に配置
+    this.frameSprite.position.copy(this.sprite.position);
+    this.frameSprite.position.z = -0.1; // 手の後ろに配置
+  }
+
+  /**
+   * 丸枠のテクスチャを更新
+   */
+  private updateFrame(): void {
+    if (!this.frameSprite) return;
+
+    const frameMaterial = this.frameSprite.material as THREE.SpriteMaterial;
+    frameMaterial.map = assetLoader.getFrameTexture(this.currentType);
+    frameMaterial.needsUpdate = true;
+  }
+
+  /**
+   * 位置を設定
+   */
+  setPosition(x: number, y: number): void {
+    this.sprite.position.set(x, y, this.sprite.position.z);
+    if (this.frameSprite) {
+      this.frameSprite.position.set(x, y, this.frameSprite.position.z);
+    }
+  }
+
+  /**
+   * 位置を取得
+   */
+  getPosition(): THREE.Vector3 {
+    return this.sprite.position.clone();
+  }
+
+  /**
+   * スプライトを取得
+   */
+  getSprite(): THREE.Sprite {
+    return this.sprite;
+  }
+
+  /**
+   * 丸枠スプライトを取得
+   */
+  getFrameSprite(): THREE.Sprite | null {
+    return this.frameSprite;
+  }
+
+  /**
+   * 現在の手の種類を取得
+   */
+  getHandType(): HandType {
+    return this.currentType;
+  }
+
+  /**
+   * 更新処理（アニメーション）
+   */
+  update(deltaTime: number): void {
+    if (!this.bounceAnimation?.active) return;
+
+    const elapsed = performance.now() - this.bounceAnimation.startTime;
+    const progress = elapsed / (ANIMATION.HAND_BOUNCE_DURATION * 1000);
+
+    if (progress >= 1) {
+      // アニメーション終了
+      this.sprite.position.y = this.bounceAnimation.startY;
+      this.bounceAnimation.active = false;
+      if (this.frameSprite) {
+        this.frameSprite.position.y = this.bounceAnimation.startY;
+      }
+      return;
+    }
+
+    // イージング関数（ease-out）
+    const easeOut = 1 - Math.pow(1 - progress, 3);
+    const offset = Math.sin(easeOut * Math.PI) * ANIMATION.HAND_BOUNCE_HEIGHT;
+
+    this.sprite.position.y = this.bounceAnimation.startY - offset;
+    if (this.frameSprite) {
+      this.frameSprite.position.y = this.sprite.position.y;
+    }
+  }
+
+  /**
+   * 表示/非表示を設定
+   */
+  setVisible(visible: boolean): void {
+    this.sprite.visible = visible;
+    if (this.frameSprite) {
+      this.frameSprite.visible = visible;
+    }
+  }
+
+  /**
+   * リソースを破棄
+   */
+  dispose(): void {
+    this.sprite.material.dispose();
+    if (this.frameSprite) {
+      this.frameSprite.material.dispose();
+    }
+  }
+}

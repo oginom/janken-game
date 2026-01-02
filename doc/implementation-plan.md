@@ -82,16 +82,16 @@ janken-game/
   - アセット切り替え機能(プレースホルダー⇔実画像)
 
 ### フェーズ4: Three.js基盤
-- [ ] `graphics/Renderer.ts` - WebGLRenderer初期化
-- [ ] `graphics/Camera.ts` - OrthographicCamera設定
-- [ ] `graphics/Background.ts` - 背景描画
+- [x] `graphics/Renderer.ts` - WebGLRenderer初期化
+- [x] `graphics/Camera.ts` - OrthographicCamera設定
+- [x] `graphics/Background.ts` - 背景描画
   - カメラフィード表示
   - 背景画像表示
   - 半透明オーバーレイ
-- [ ] `graphics/HandSprite.ts` - 手のスプライト描画
+- [x] `graphics/HandSprite.ts` - 手のスプライト描画
   - テクスチャ適用
   - アニメーション(跳ねる動き)
-- [ ] `graphics/UIElements.ts` - UI描画
+- [x] `graphics/UIElements.ts` - UI描画
   - ライフ表示
   - スコア表示(HTML要素でも可)
 
