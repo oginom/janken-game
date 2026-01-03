@@ -1,7 +1,7 @@
-import * as THREE from 'three';
 import { Scene } from './Scene';
 import { Background } from '../graphics/Background';
 import { settingsManager, isKeyboardDebugMode } from '../utils/Settings';
+import { HandTracker } from '../game/HandTracker';
 
 /**
  * タイトル画面
@@ -11,6 +11,7 @@ export class TitleScene extends Scene {
   private uiContainer: HTMLDivElement | null = null;
   private onStartCallback: (() => void) | null = null;
   private video: HTMLVideoElement;
+  private handTracker: HandTracker | null = null;
 
   constructor(video: HTMLVideoElement) {
     super();
@@ -27,6 +28,25 @@ export class TitleScene extends Scene {
     if (this.background) {
       this.scene.add(this.background.getBackgroundPlane());
       this.scene.add(this.background.getOverlayPlane());
+    }
+
+    // カメラ表示が有効な場合、カメラを起動
+    const showCamera = settingsManager.getCameraVisible();
+    if (showCamera) {
+      try {
+        this.handTracker = new HandTracker(this.video);
+        await this.handTracker.init();
+        await this.handTracker.startCamera();
+
+        // 背景にカメラ映像を表示
+        if (this.background) {
+          this.background.enableCameraBackground();
+        }
+
+        console.log('タイトル画面: カメラ起動完了');
+      } catch (error) {
+        console.error('タイトル画面: カメラ起動エラー:', error);
+      }
     }
 
     // UI要素を作成
@@ -150,7 +170,7 @@ export class TitleScene extends Scene {
   /**
    * 更新処理
    */
-  update(deltaTime: number): void {
+  update(_deltaTime: number): void {
     if (this.background) {
       this.background.update();
     }
@@ -160,6 +180,13 @@ export class TitleScene extends Scene {
    * 終了処理
    */
   dispose(): void {
+    // HandTrackerは破棄しない（カメラストリームを次のシーンでも使用するため）
+    // ジェスチャー認識のみ停止（タイトル画面では使用していないが一貫性のため）
+    if (this.handTracker) {
+      this.handTracker.stop();
+      this.handTracker = null;
+    }
+
     if (this.background) {
       this.background.dispose();
       this.background = null;

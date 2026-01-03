@@ -12,9 +12,11 @@ export class GameOverScene extends Scene {
   private onTitleCallback: (() => void) | null = null;
   private finalScore: number;
   private highScore: number;
+  private video: HTMLVideoElement;
 
   constructor(video: HTMLVideoElement, finalScore: number, highScore: number) {
     super();
+    this.video = video;
     const showCamera = settingsManager.getCameraVisible();
     this.background = new Background(video, showCamera);
     this.finalScore = finalScore;
@@ -29,6 +31,16 @@ export class GameOverScene extends Scene {
     if (this.background) {
       this.scene.add(this.background.getBackgroundPlane());
       this.scene.add(this.background.getOverlayPlane());
+    }
+
+    // カメラ表示が有効な場合、カメラを起動（ゲームシーンで既に起動されているため、背景のみ更新）
+    const showCamera = settingsManager.getCameraVisible();
+    if (showCamera && this.background) {
+      // カメラストリームが既に存在する場合、背景に設定
+      if (this.video.srcObject) {
+        this.background.enableCameraBackground();
+        console.log('ゲームオーバー画面: カメラ映像を背景に設定');
+      }
     }
 
     // UI要素を作成

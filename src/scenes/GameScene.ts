@@ -105,7 +105,12 @@ export class GameScene extends Scene {
     try {
       this.handTracker = new HandTracker(this.video);
       await this.handTracker.init();
-      await this.handTracker.startCamera();
+
+      // カメラストリームが既に存在する場合はそれを使用、なければ新規起動
+      if (!this.video.srcObject) {
+        await this.handTracker.startCamera();
+      }
+
       this.handTracker.start();
 
       // カメラ表示が有効な場合、背景にカメラ映像を表示
@@ -205,6 +210,11 @@ export class GameScene extends Scene {
    * 更新処理
    */
   update(deltaTime: number): void {
+    // シーンが破棄されている場合は更新しない
+    if (!this.enemyManager) {
+      return;
+    }
+
     if (this.background) {
       this.background.update();
     }
@@ -236,42 +246,40 @@ export class GameScene extends Scene {
       this.rightHand.update(deltaTime);
     }
 
-    if (this.enemyManager) {
-      this.enemyManager.update(deltaTime);
+    this.enemyManager.update(deltaTime);
 
-      // 衝突判定
-      const enemies = this.enemyManager.getEnemies();
-      const collisions = CollisionDetector.checkCollisions(
-        this.leftHand,
-        this.rightHand,
-        enemies
-      );
+    // 衝突判定
+    const enemies = this.enemyManager.getEnemies();
+    const collisions = CollisionDetector.checkCollisions(
+      this.leftHand,
+      this.rightHand,
+      enemies
+    );
 
-      // 衝突があった敵を削除（後ろから削除して配列のインデックスずれを防ぐ）
-      const indicesToRemove = collisions.map((c) => c.enemyIndex).sort((a, b) => b - a);
+    // 衝突があった敵を削除（後ろから削除して配列のインデックスずれを防ぐ）
+    const indicesToRemove = collisions.map((c) => c.enemyIndex).sort((a, b) => b - a);
 
-      for (const collision of collisions) {
-        CollisionDetector.applyCollisionResult(
-          collision,
-          (points) => this.gameState.addScore(points),
-          (amount) => this.gameState.loseLife(amount),
-          () => {
-            this.difficultyManager.incrementDefeatedCount();
-            // 難易度レベル表示を更新
-            if (this.uiElements) {
-              this.uiElements.updateLevel(
-                this.difficultyManager.getCurrentLevel(),
-                this.difficultyManager.getDefeatedCount()
-              );
-            }
+    for (const collision of collisions) {
+      CollisionDetector.applyCollisionResult(
+        collision,
+        (points) => this.gameState.addScore(points),
+        (amount) => this.gameState.loseLife(amount),
+        () => {
+          this.difficultyManager.incrementDefeatedCount();
+          // 難易度レベル表示を更新
+          if (this.uiElements) {
+            this.uiElements.updateLevel(
+              this.difficultyManager.getCurrentLevel(),
+              this.difficultyManager.getDefeatedCount()
+            );
           }
-        );
-      }
+        }
+      );
+    }
 
-      // 衝突した敵を削除
-      for (const index of indicesToRemove) {
-        this.enemyManager.removeEnemy(index);
-      }
+    // 衝突した敵を削除
+    for (const index of indicesToRemove) {
+      this.enemyManager.removeEnemy(index);
     }
 
     // 敵の生成タイマー
@@ -286,9 +294,10 @@ export class GameScene extends Scene {
    * 終了処理
    */
   dispose(): void {
-    // HandTrackerを破棄
+    // HandTrackerは破棄しない（カメラストリームを次のシーンでも使用するため）
+    // ジェスチャー認識のみ停止
     if (this.handTracker) {
-      this.handTracker.dispose();
+      this.handTracker.stop();
       this.handTracker = null;
     }
 
