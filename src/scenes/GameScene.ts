@@ -9,7 +9,7 @@ import { CollisionDetector } from '../game/CollisionDetector';
 import { HandTracker } from '../game/HandTracker';
 import type { HandType } from '../types';
 import { PLAYER_HAND_POSITION, GAME_CONFIG } from '../utils/Constants';
-import { settingsManager } from '../utils/Settings';
+import { settingsManager, isKeyboardDebugMode } from '../utils/Settings';
 
 /**
  * ゲームプレイ画面
@@ -31,17 +31,19 @@ export class GameScene extends Scene {
   // 敵生成のタイマー
   private spawnTimer: number = 0;
 
-  // カメラ使用フラグ
-  private usesCamera: boolean;
+  // カメラ表示フラグとジェスチャー認識フラグ
+  private showsCamera: boolean;
+  private usesGesture: boolean;
   private video: HTMLVideoElement;
 
   constructor(video: HTMLVideoElement, gameState: GameState) {
     super();
     this.video = video;
-    this.background = new Background(video);
+    this.showsCamera = settingsManager.getCameraVisible();
+    this.usesGesture = !isKeyboardDebugMode();
+    this.background = new Background(video, this.showsCamera);
     this.gameState = gameState;
     this.difficultyManager = new DifficultyManager();
-    this.usesCamera = settingsManager.getCameraEnabled();
   }
 
   /**
@@ -99,24 +101,29 @@ export class GameScene extends Scene {
     // 敵マネージャーを初期化
     this.enemyManager = new EnemyManager(this.scene);
 
-    // カメラが有効な場合、HandTrackerを初期化
-    if (this.usesCamera) {
-      try {
-        this.handTracker = new HandTracker(this.video);
-        await this.handTracker.init();
-        await this.handTracker.startCamera();
-        this.handTracker.start();
-        console.log('HandTracker初期化完了');
-      } catch (error) {
-        console.error('HandTracker初期化エラー:', error);
-        console.log('キーボード操作にフォールバック');
-        this.usesCamera = false;
+    // HandTrackerを初期化（常に起動を試みる）
+    try {
+      this.handTracker = new HandTracker(this.video);
+      await this.handTracker.init();
+      await this.handTracker.startCamera();
+      this.handTracker.start();
+
+      // カメラ表示が有効な場合、背景にカメラ映像を表示
+      if (this.showsCamera && this.background) {
+        this.background.enableCameraBackground();
       }
+
+      console.log('HandTracker初期化完了');
+    } catch (error) {
+      console.error('HandTracker初期化エラー:', error);
+      console.log('ジェスチャー認識が使用できません。キーボード操作にフォールバック');
+      this.usesGesture = false;
     }
 
-    // カメラが無効またはエラーの場合、キーボードイベントリスナーを設定
-    if (!this.usesCamera) {
+    // デバッグモードまたはエラー時、キーボードイベントリスナーを設定
+    if (!this.usesGesture) {
       this.setupKeyboardControls();
+      console.log('🎮 キーボードデバッグモード有効');
     }
 
     // 最初の敵をすぐに生成
@@ -202,8 +209,8 @@ export class GameScene extends Scene {
       this.background.update();
     }
 
-    // カメラ使用時、HandTrackerから手の状態を取得
-    if (this.usesCamera && this.handTracker) {
+    // ジェスチャー認識が有効な場合、HandTrackerから手の状態を取得
+    if (this.usesGesture && this.handTracker) {
       const leftHandType = this.handTracker.getLeftHandType();
       const rightHandType = this.handTracker.getRightHandType();
 
@@ -219,6 +226,7 @@ export class GameScene extends Scene {
         this.rightHand.setHandType(rightHandType);
       }
     }
+    // キーボードデバッグモードの場合はキーボードイベントで更新される
 
     if (this.leftHand) {
       this.leftHand.update(deltaTime);

@@ -16,10 +16,10 @@ export class SettingsManager {
    * LocalStorageから設定を読み込む
    */
   private loadSettings(): Settings {
-    const cameraEnabled = localStorage.getItem(STORAGE_KEYS.CAMERA_ENABLED);
+    const cameraVisible = localStorage.getItem(STORAGE_KEYS.CAMERA_VISIBLE);
 
     return {
-      cameraEnabled: cameraEnabled === 'true', // デフォルトはfalse
+      cameraVisible: cameraVisible === 'true', // デフォルトはfalse
     };
   }
 
@@ -28,33 +28,33 @@ export class SettingsManager {
    */
   private saveSettings(): void {
     localStorage.setItem(
-      STORAGE_KEYS.CAMERA_ENABLED,
-      String(this.settings.cameraEnabled)
+      STORAGE_KEYS.CAMERA_VISIBLE,
+      String(this.settings.cameraVisible)
     );
   }
 
   /**
-   * カメラ設定を取得
+   * カメラ表示設定を取得
    */
-  getCameraEnabled(): boolean {
-    return this.settings.cameraEnabled;
+  getCameraVisible(): boolean {
+    return this.settings.cameraVisible;
   }
 
   /**
-   * カメラ設定を変更
+   * カメラ表示設定を変更
    */
-  setCameraEnabled(enabled: boolean): void {
-    this.settings.cameraEnabled = enabled;
+  setCameraVisible(visible: boolean): void {
+    this.settings.cameraVisible = visible;
     this.saveSettings();
   }
 
   /**
-   * カメラ設定をトグル
+   * カメラ表示設定をトグル
    */
-  toggleCamera(): boolean {
-    this.settings.cameraEnabled = !this.settings.cameraEnabled;
+  toggleCameraVisible(): boolean {
+    this.settings.cameraVisible = !this.settings.cameraVisible;
     this.saveSettings();
-    return this.settings.cameraEnabled;
+    return this.settings.cameraVisible;
   }
 
   /**
@@ -81,10 +81,25 @@ export class SettingsManager {
    * すべての設定をリセット
    */
   reset(): void {
-    localStorage.removeItem(STORAGE_KEYS.CAMERA_ENABLED);
+    localStorage.removeItem(STORAGE_KEYS.CAMERA_VISIBLE);
     localStorage.removeItem(STORAGE_KEYS.HIGH_SCORE);
     this.settings = this.loadSettings();
   }
+}
+
+/**
+ * キーボードデバッグモード判定
+ * 環境変数またはURLクエリパラメータでキーボード操作を有効化
+ */
+export function isKeyboardDebugMode(): boolean {
+  // 環境変数チェック
+  if (import.meta.env.VITE_DEBUG_KEYBOARD === 'true') {
+    return true;
+  }
+
+  // URLクエリパラメータチェック
+  const params = new URLSearchParams(window.location.search);
+  return params.get('debug') === 'keyboard';
 }
 
 // シングルトンインスタンス

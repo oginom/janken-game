@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Scene } from './Scene';
 import { Background } from '../graphics/Background';
-import { settingsManager } from '../utils/Settings';
+import { settingsManager, isKeyboardDebugMode } from '../utils/Settings';
 
 /**
  * タイトル画面
@@ -10,10 +10,13 @@ export class TitleScene extends Scene {
   private background: Background | null = null;
   private uiContainer: HTMLDivElement | null = null;
   private onStartCallback: (() => void) | null = null;
+  private video: HTMLVideoElement;
 
   constructor(video: HTMLVideoElement) {
     super();
-    this.background = new Background(video);
+    this.video = video;
+    const showCamera = settingsManager.getCameraVisible();
+    this.background = new Background(video, showCamera);
   }
 
   /**
@@ -87,8 +90,16 @@ export class TitleScene extends Scene {
 
     // 注意書き
     const notice = document.createElement('p');
-    notice.textContent =
-      'カメラON: ジェスチャー認識で操作\nカメラOFF: キーボードで操作 (1,2,3 = 左手 / 4,5,6 = 右手)\nグー・チョキ・パー';
+    const isDebugMode = isKeyboardDebugMode();
+
+    if (isDebugMode) {
+      notice.textContent =
+        'カメラON: 背景にカメラ映像を表示\nカメラOFF: 白い背景のみ表示\n\nジェスチャー認識で操作します\nグー・チョキ・パー\n\n🎮 デバッグモード: キーボード操作\n(1,2,3 = 左手 / 4,5,6 = 右手)';
+    } else {
+      notice.textContent =
+        'カメラON: 背景にカメラ映像を表示\nカメラOFF: 白い背景のみ表示\n\nジェスチャー認識で操作します\nグー・チョキ・パー';
+    }
+
     notice.style.color = '#ffffff';
     notice.style.fontSize = '14px';
     notice.style.textAlign = 'center';
@@ -105,7 +116,7 @@ export class TitleScene extends Scene {
     cameraToggleContainer.style.pointerEvents = 'auto';
 
     const cameraLabel = document.createElement('label');
-    cameraLabel.textContent = 'カメラを使用: ';
+    cameraLabel.textContent = 'カメラを表示: ';
     cameraLabel.style.color = '#ffffff';
     cameraLabel.style.fontSize = '16px';
     cameraLabel.style.marginRight = '10px';
@@ -113,12 +124,12 @@ export class TitleScene extends Scene {
 
     const cameraToggle = document.createElement('input');
     cameraToggle.type = 'checkbox';
-    cameraToggle.checked = settingsManager.getCameraEnabled();
+    cameraToggle.checked = settingsManager.getCameraVisible();
     cameraToggle.style.width = '20px';
     cameraToggle.style.height = '20px';
     cameraToggle.style.cursor = 'pointer';
     cameraToggle.addEventListener('change', () => {
-      settingsManager.setCameraEnabled(cameraToggle.checked);
+      settingsManager.setCameraVisible(cameraToggle.checked);
     });
 
     cameraToggleContainer.appendChild(cameraLabel);

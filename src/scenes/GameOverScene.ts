@@ -1,5 +1,6 @@
 import { Scene } from './Scene';
 import { Background } from '../graphics/Background';
+import { settingsManager } from '../utils/Settings';
 
 /**
  * ゲームオーバー画面
@@ -14,7 +15,8 @@ export class GameOverScene extends Scene {
 
   constructor(video: HTMLVideoElement, finalScore: number, highScore: number) {
     super();
-    this.background = new Background(video);
+    const showCamera = settingsManager.getCameraVisible();
+    this.background = new Background(video, showCamera);
     this.finalScore = finalScore;
     this.highScore = highScore;
   }

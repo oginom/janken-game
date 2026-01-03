@@ -126,6 +126,6 @@ export const GESTURE_MAPPING = {
 
 // LocalStorage キー
 export const STORAGE_KEYS = {
-  CAMERA_ENABLED: 'janken_camera_enabled',
+  CAMERA_VISIBLE: 'janken_camera_visible',
   HIGH_SCORE: 'janken_high_score',
 } as const;
