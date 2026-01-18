@@ -3,6 +3,8 @@
  * Web Audio APIを使用して音声ファイルを再生
  */
 
+import { settingsManager } from '../utils/Settings';
+
 export type SoundType = 'win' | 'draw_or_lose';
 
 export class SoundManager {
@@ -59,6 +61,11 @@ export class SoundManager {
    * 効果音を再生
    */
   play(type: SoundType): void {
+    // 効果音が無効な場合は再生しない
+    if (!settingsManager.getSoundEnabled()) {
+      return;
+    }
+
     if (!this.initialized) {
       console.warn('SoundManager not initialized');
       return;

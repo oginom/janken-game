@@ -17,9 +17,11 @@ export class SettingsManager {
    */
   private loadSettings(): Settings {
     const cameraVisible = localStorage.getItem(STORAGE_KEYS.CAMERA_VISIBLE);
+    const soundEnabled = localStorage.getItem(STORAGE_KEYS.SOUND_ENABLED);
 
     return {
       cameraVisible: cameraVisible === 'true', // デフォルトはfalse
+      soundEnabled: soundEnabled !== 'false', // デフォルトはtrue（初回はnull）
     };
   }
 
@@ -30,6 +32,10 @@ export class SettingsManager {
     localStorage.setItem(
       STORAGE_KEYS.CAMERA_VISIBLE,
       String(this.settings.cameraVisible)
+    );
+    localStorage.setItem(
+      STORAGE_KEYS.SOUND_ENABLED,
+      String(this.settings.soundEnabled)
     );
   }
 
@@ -58,6 +64,30 @@ export class SettingsManager {
   }
 
   /**
+   * 効果音設定を取得
+   */
+  getSoundEnabled(): boolean {
+    return this.settings.soundEnabled;
+  }
+
+  /**
+   * 効果音設定を変更
+   */
+  setSoundEnabled(enabled: boolean): void {
+    this.settings.soundEnabled = enabled;
+    this.saveSettings();
+  }
+
+  /**
+   * 効果音設定をトグル
+   */
+  toggleSoundEnabled(): boolean {
+    this.settings.soundEnabled = !this.settings.soundEnabled;
+    this.saveSettings();
+    return this.settings.soundEnabled;
+  }
+
+  /**
    * ハイスコアを取得
    */
   getHighScore(): number {
@@ -82,6 +112,7 @@ export class SettingsManager {
    */
   reset(): void {
     localStorage.removeItem(STORAGE_KEYS.CAMERA_VISIBLE);
+    localStorage.removeItem(STORAGE_KEYS.SOUND_ENABLED);
     localStorage.removeItem(STORAGE_KEYS.HIGH_SCORE);
     this.settings = this.loadSettings();
   }

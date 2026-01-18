@@ -129,11 +129,18 @@ export class TitleScene extends Scene {
     notice.style.lineHeight = '1.6';
     this.uiContainer.appendChild(notice);
 
+    // 設定コンテナ（カメラと効果音）
+    const settingsContainer = document.createElement('div');
+    settingsContainer.style.display = 'flex';
+    settingsContainer.style.flexDirection = 'column';
+    settingsContainer.style.alignItems = 'flex-start';
+    settingsContainer.style.gap = '10px';
+    settingsContainer.style.pointerEvents = 'auto';
+
     // カメラ設定トグル
     const cameraToggleContainer = document.createElement('div');
     cameraToggleContainer.style.display = 'flex';
     cameraToggleContainer.style.alignItems = 'center';
-    cameraToggleContainer.style.pointerEvents = 'auto';
 
     const cameraLabel = document.createElement('label');
     cameraLabel.textContent = 'カメラを表示: ';
@@ -154,7 +161,36 @@ export class TitleScene extends Scene {
 
     cameraToggleContainer.appendChild(cameraLabel);
     cameraToggleContainer.appendChild(cameraToggle);
-    this.uiContainer.appendChild(cameraToggleContainer);
+
+    // 効果音設定トグル
+    const soundToggleContainer = document.createElement('div');
+    soundToggleContainer.style.display = 'flex';
+    soundToggleContainer.style.alignItems = 'center';
+
+    const soundLabel = document.createElement('label');
+    soundLabel.textContent = '効果音: ';
+    soundLabel.style.color = '#ffffff';
+    soundLabel.style.fontSize = '16px';
+    soundLabel.style.marginRight = '10px';
+    soundLabel.style.textShadow = '2px 2px 4px rgba(0, 0, 0, 0.8)';
+
+    const soundToggle = document.createElement('input');
+    soundToggle.type = 'checkbox';
+    soundToggle.checked = settingsManager.getSoundEnabled();
+    soundToggle.style.width = '20px';
+    soundToggle.style.height = '20px';
+    soundToggle.style.cursor = 'pointer';
+    soundToggle.addEventListener('change', () => {
+      settingsManager.setSoundEnabled(soundToggle.checked);
+    });
+
+    soundToggleContainer.appendChild(soundLabel);
+    soundToggleContainer.appendChild(soundToggle);
+
+    // 設定コンテナに追加
+    settingsContainer.appendChild(cameraToggleContainer);
+    settingsContainer.appendChild(soundToggleContainer);
+    this.uiContainer.appendChild(settingsContainer);
 
     // DOMに追加
     document.body.appendChild(this.uiContainer);

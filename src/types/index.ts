@@ -54,4 +54,5 @@ export type SoundType = 'win' | 'lose' | 'gameover';
 // 設定
 export interface Settings {
   cameraVisible: boolean;
+  soundEnabled: boolean;
 }

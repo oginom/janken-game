@@ -148,5 +148,6 @@ export const SOUND_FILES = {
 // LocalStorage キー
 export const STORAGE_KEYS = {
   CAMERA_VISIBLE: 'janken_camera_visible',
+  SOUND_ENABLED: 'janken_sound_enabled',
   HIGH_SCORE: 'janken_high_score',
 } as const;

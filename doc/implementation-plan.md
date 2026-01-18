@@ -215,12 +215,17 @@ janken-game/
 
 ### フェーズ15: サウンド
 **目標: 効果音が鳴る**
-- [x] `audio/SoundManager.ts` - 効果音管理
+- [x] `audio/SoundManager.ts` - 効果音管理（シングルトンパターン）
   - Web Audio API使用
   - 実際の音声ファイル再生
+  - 設定に基づいて再生ON/OFF切り替え
 - [x] GameSceneに効果音を追加
   - 勝利時: `/小キック.mp3`
   - 敗北/あいこ時: `/ロボットを殴る3.mp3`
+- [x] 効果音設定機能の実装
+  - Settings.tsに効果音ON/OFF設定を追加
+  - TitleSceneに効果音チェックボックスを追加
+  - LocalStorageで設定を永続化（デフォルト: ON）
 - [ ] その他のシーンに効果音を追加（将来の拡張）
   - ゲームオーバー時
 
