@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import { GameRenderer } from './graphics/Renderer';
 import { GameCamera } from './graphics/Camera';
 import { assetLoader } from './assets/AssetLoader';

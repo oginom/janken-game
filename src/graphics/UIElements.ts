@@ -100,7 +100,7 @@ export class UIElements {
   /**
    * 難易度レベル表示を更新
    */
-  updateLevel(level: number, defeatedCount: number): void {
+  updateLevel(level: number, _defeatedCount: number): void {
     //this.levelText.textContent = `Level ${level} (${defeatedCount % 5}/5)`;
     this.levelText.textContent = `Level ${level}`;
   }

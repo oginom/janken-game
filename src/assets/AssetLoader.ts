@@ -80,24 +80,6 @@ export class AssetLoader {
   }
 
   /**
-   * URLからテクスチャを読み込む（実画像用）
-   */
-  private loadTexture(url: string): Promise<THREE.Texture> {
-    return new Promise((resolve, reject) => {
-      this.textureLoader.load(
-        url,
-        (texture) => {
-          texture.minFilter = THREE.LinearFilter;
-          texture.magFilter = THREE.LinearFilter;
-          resolve(texture);
-        },
-        undefined,
-        (error) => reject(error)
-      );
-    });
-  }
-
-  /**
    * 手の画像テクスチャを取得
    */
   getHandTexture(type: HandType): THREE.Texture | undefined {
@@ -114,8 +96,8 @@ export class AssetLoader {
   /**
    * ハートのテクスチャを取得
    */
-  getHeartTexture(filled: boolean): THREE.Texture | undefined {
-    return this.textures.get(filled ? 'heart-filled' : 'heart-empty');
+  getHeartTexture(filled: boolean): THREE.Texture | null {
+    return this.textures.get(filled ? 'heart-filled' : 'heart-empty') ?? null;
   }
 
   /**

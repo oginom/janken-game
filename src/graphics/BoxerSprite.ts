@@ -6,7 +6,6 @@ import type { HandType } from '../types';
  */
 export class BoxerSprite {
   private element: HTMLImageElement | null = null;
-  private currentPose: 'base' | 'rock' | 'scissors' | 'paper' = 'base';
   private isFlipped: boolean = false;
 
   // 待機モーション用
@@ -66,7 +65,6 @@ export class BoxerSprite {
 
       if (this.poseTimer <= 0) {
         // ポーズ終了、base画像に戻す
-        this.currentPose = 'base';
         this.element.src = this.IMAGES.base;
         this.isFlipped = false;
         this.isPosing = false;
@@ -107,7 +105,6 @@ export class BoxerSprite {
     // ポーズ状態に移行
     this.isPosing = true;
     this.poseTimer = this.POSE_DURATION;
-    this.currentPose = handType;
     this.isFlipped = isLeftHand;
 
     // 画像を変更
