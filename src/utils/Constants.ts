@@ -106,7 +106,7 @@ export const ANIMATION = {
 
 // 背景設定
 export const BACKGROUND = {
-  OVERLAY_ALPHA: 0.7, // 白い半透明オーバーレイの透明度
+  OVERLAY_ALPHA: 0.5, // 白い半透明オーバーレイの透明度
   COLOR: 0xffffff, // オーバーレイの色（白）
 } as const;
 
