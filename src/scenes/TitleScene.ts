@@ -158,38 +158,45 @@ export class TitleScene extends Scene {
     cameraToggle.addEventListener('change', async () => {
       settingsManager.setCameraVisible(cameraToggle.checked);
 
-      // カメラ設定を即座に反映
+      // カメラ表示設定を即座に反映
       if (cameraToggle.checked) {
-        // カメラON
+        // カメラ表示ON
         try {
+          // カメラがまだ起動していない場合は起動
           if (!this.handTracker) {
             this.handTracker = new HandTracker(this.video);
             await this.handTracker.init();
+            await this.handTracker.startCamera();
           }
-          await this.handTracker.startCamera();
 
           // 背景にカメラ映像を表示
           if (this.background) {
             this.background.enableCameraBackground();
           }
 
-          console.log('カメラON: カメラ映像を表示');
+          console.log('カメラ表示ON: カメラ映像を表示（認識は継続）');
         } catch (error) {
           console.error('カメラ起動エラー:', error);
         }
       } else {
-        // カメラOFF
-        if (this.handTracker) {
-          this.handTracker.dispose();
-          this.handTracker = null;
+        // カメラ表示OFF（カメラストリームは起動したまま、表示だけオフ）
+        // カメラがまだ起動していない場合は起動（ジェスチャー認識のため）
+        if (!this.handTracker) {
+          try {
+            this.handTracker = new HandTracker(this.video);
+            await this.handTracker.init();
+            await this.handTracker.startCamera();
+          } catch (error) {
+            console.error('カメラ起動エラー:', error);
+          }
         }
 
-        // 白背景に戻す
+        // 白背景に戻す（カメラ映像を非表示）
         if (this.background) {
           this.background.disableCameraBackground();
         }
 
-        console.log('カメラOFF: 白背景を表示');
+        console.log('カメラ表示OFF: 白背景を表示（認識は継続）');
       }
     });
 
