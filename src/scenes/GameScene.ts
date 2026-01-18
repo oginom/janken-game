@@ -8,6 +8,7 @@ import { EnemyManager } from '../game/EnemyManager';
 import { DifficultyManager } from '../game/DifficultyManager';
 import { CollisionDetector } from '../game/CollisionDetector';
 import { HandTracker } from '../game/HandTracker';
+import { SoundManager } from '../audio/SoundManager';
 import type { HandType } from '../types';
 import { PLAYER_HAND_POSITION, GAME_CONFIG } from '../utils/Constants';
 import { settingsManager, isKeyboardDebugMode } from '../utils/Settings';
@@ -25,6 +26,7 @@ export class GameScene extends Scene {
   private enemyManager: EnemyManager | null = null;
   private difficultyManager: DifficultyManager;
   private handTracker: HandTracker | null = null;
+  private soundManager: SoundManager;
 
   // 現在の手（カメラまたはキーボード操作）
   private currentLeftHand: HandType = 'rock';
@@ -46,12 +48,16 @@ export class GameScene extends Scene {
     this.background = new Background(video, this.showsCamera);
     this.gameState = gameState;
     this.difficultyManager = new DifficultyManager();
+    this.soundManager = SoundManager.getInstance();
   }
 
   /**
    * シーンの初期化
    */
   async init(): Promise<void> {
+    // 効果音を読み込み
+    await this.soundManager.initialize();
+
     // 背景を追加
     if (this.background) {
       this.scene.add(this.background.getBackgroundPlane());
@@ -278,6 +284,14 @@ export class GameScene extends Scene {
         this.boxerSprite.showPose(playerHandType, isLeftHand);
       }
 
+      // 効果音を再生
+      if (collision.result === 'win') {
+        this.soundManager.play('win');
+      } else {
+        // あいこまたは負け
+        this.soundManager.play('draw_or_lose');
+      }
+
       CollisionDetector.applyCollisionResult(
         collision,
         (points) => this.gameState.addScore(points),
@@ -330,6 +344,8 @@ export class GameScene extends Scene {
       this.boxerSprite.dispose();
       this.boxerSprite = null;
     }
+
+    // SoundManagerはシングルトンなので破棄しない（アプリ全体で共有）
 
     if (this.background) {
       this.background.dispose();

@@ -139,6 +139,12 @@ export const BOXER_IMAGES = {
   PAPER: '/boxer_pa.png',
 } as const;
 
+// 効果音設定
+export const SOUND_FILES = {
+  WIN: '/小キック.mp3',
+  DRAW_OR_LOSE: '/ロボットを殴る3.mp3',
+} as const;
+
 // LocalStorage キー
 export const STORAGE_KEYS = {
   CAMERA_VISIBLE: 'janken_camera_visible',
