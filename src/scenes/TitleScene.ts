@@ -2,6 +2,7 @@ import { Scene } from './Scene';
 import { Background } from '../graphics/Background';
 import { settingsManager, isKeyboardDebugMode } from '../utils/Settings';
 import { HandTracker } from '../game/HandTracker';
+import { SoundManager } from '../audio/SoundManager';
 
 /**
  * タイトル画面
@@ -30,6 +31,12 @@ export class TitleScene extends Scene {
       this.scene.add(this.background.getOverlayPlane());
     }
 
+    // ボクサー画像を事前にプリロード
+    this.preloadBoxerImages();
+
+    // 効果音を事前にプリロード
+    this.preloadSounds();
+
     // カメラ表示が有効な場合、カメラを起動
     const showCamera = settingsManager.getCameraVisible();
     if (showCamera) {
@@ -51,6 +58,38 @@ export class TitleScene extends Scene {
 
     // UI要素を作成
     this.createUI();
+  }
+
+  /**
+   * ボクサー画像を事前にプリロード
+   */
+  private preloadBoxerImages(): void {
+    const imagePaths = [
+      '/boxer_base.png',
+      '/boxer_gu.png',
+      '/boxer_cho.png',
+      '/boxer_pa.png',
+    ];
+
+    imagePaths.forEach((path) => {
+      const img = new Image();
+      img.src = path;
+    });
+
+    console.log('タイトル画面: ボクサー画像をプリロード開始');
+  }
+
+  /**
+   * 効果音を事前にプリロード
+   */
+  private async preloadSounds(): Promise<void> {
+    try {
+      const soundManager = SoundManager.getInstance();
+      await soundManager.initialize();
+      console.log('タイトル画面: 効果音をプリロード完了');
+    } catch (error) {
+      console.error('タイトル画面: 効果音プリロードエラー:', error);
+    }
   }
 
   /**
