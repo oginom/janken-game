@@ -18,7 +18,7 @@ export class BoxerSprite {
 
   // 定数
   private readonly IDLE_INTERVAL = 0.5; // 待機モーション間隔（秒）
-  private readonly IDLE_OFFSET_PERCENT = 7.5; // 待機モーションの移動量（%）
+  private readonly IDLE_OFFSET_PERCENT = 5; // 待機モーションの移動量（%）
   private readonly POSE_DURATION = 0.5; // ポーズ表示時間（秒）
 
   // 画像パス
@@ -71,6 +71,10 @@ export class BoxerSprite {
 
         // 待機モーションを再開（タイマーリセット）
         this.idleTimer = 0;
+
+        // 待機モーションのoffsetに戻す
+        const offsetY = this.isIdleUp ? 0 : -this.IDLE_OFFSET_PERCENT;
+        this.element.style.transform = `translateX(-50%) translateY(${offsetY}%)`;
       } else {
         // ポーズ中は待機モーションを実行しない
         return;
@@ -86,8 +90,8 @@ export class BoxerSprite {
 
       // Y座標をオフセット
       const offsetY = this.isIdleUp
-        ? -this.IDLE_OFFSET_PERCENT
-        : this.IDLE_OFFSET_PERCENT;
+        ? 0
+        : -this.IDLE_OFFSET_PERCENT;
 
       const scaleX = this.isFlipped ? -1 : 1;
       this.element.style.transform = `translateX(-50%) translateY(${offsetY}%) scaleX(${scaleX})`;
@@ -113,11 +117,10 @@ export class BoxerSprite {
     // 左手の場合は反転
     const scaleX = isLeftHand ? -1 : 1;
 
-    // 待機モーションの現在のオフセットを維持しつつ反転を適用
-    const offsetY = this.isIdleUp
-      ? -this.IDLE_OFFSET_PERCENT
-      : this.IDLE_OFFSET_PERCENT;
+    // 待機モーションの offset (%)
+    const offsetY = -20;
 
+    // ポーズ中は待機モーションの影響を受けないようにオフセットを0にする
     this.element.style.transform = `translateX(-50%) translateY(${offsetY}%) scaleX(${scaleX})`;
   }
 
