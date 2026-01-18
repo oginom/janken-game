@@ -2,6 +2,7 @@ import { Scene } from './Scene';
 import { Background } from '../graphics/Background';
 import { HandSprite } from '../graphics/HandSprite';
 import { UIElements } from '../graphics/UIElements';
+import { BoxerSprite } from '../graphics/BoxerSprite';
 import { GameState } from '../game/GameState';
 import { EnemyManager } from '../game/EnemyManager';
 import { DifficultyManager } from '../game/DifficultyManager';
@@ -19,6 +20,7 @@ export class GameScene extends Scene {
   private leftHand: HandSprite | null = null;
   private rightHand: HandSprite | null = null;
   private uiElements: UIElements | null = null;
+  private boxerSprite: BoxerSprite | null = null;
   private gameState: GameState;
   private enemyManager: EnemyManager | null = null;
   private difficultyManager: DifficultyManager;
@@ -100,6 +102,10 @@ export class GameScene extends Scene {
 
     // 敵マネージャーを初期化
     this.enemyManager = new EnemyManager(this.scene);
+
+    // ボクサースプライトを初期化
+    this.boxerSprite = new BoxerSprite();
+    this.boxerSprite.init();
 
     // HandTrackerを初期化（常に起動を試みる）
     try {
@@ -246,6 +252,10 @@ export class GameScene extends Scene {
       this.rightHand.update(deltaTime);
     }
 
+    if (this.boxerSprite) {
+      this.boxerSprite.update(deltaTime);
+    }
+
     this.enemyManager.update(deltaTime);
 
     // 衝突判定
@@ -260,6 +270,14 @@ export class GameScene extends Scene {
     const indicesToRemove = collisions.map((c) => c.enemyIndex).sort((a, b) => b - a);
 
     for (const collision of collisions) {
+      // プレイヤーの手がどちらか判定してボクサーにポーズを取らせる
+      const isLeftHand = collision.side === 'left';
+      const playerHandType = isLeftHand ? this.currentLeftHand : this.currentRightHand;
+
+      if (this.boxerSprite) {
+        this.boxerSprite.showPose(playerHandType, isLeftHand);
+      }
+
       CollisionDetector.applyCollisionResult(
         collision,
         (points) => this.gameState.addScore(points),
@@ -305,6 +323,12 @@ export class GameScene extends Scene {
     if ((this as any)._keydownListener) {
       window.removeEventListener('keydown', (this as any)._keydownListener);
       (this as any)._keydownListener = null;
+    }
+
+    // ボクサースプライトを破棄
+    if (this.boxerSprite) {
+      this.boxerSprite.dispose();
+      this.boxerSprite = null;
     }
 
     if (this.background) {

@@ -124,6 +124,21 @@ export const GESTURE_MAPPING = {
   Open_Palm: 'paper',
 } as const;
 
+// ボクサースプライト設定
+export const BOXER_SPRITE = {
+  IDLE_INTERVAL: 0.5, // 待機モーション間隔（秒）
+  IDLE_OFFSET_PERCENT: 7.5, // 待機モーションの移動量（画像高さの%）
+  POSE_DURATION: 0.5, // ポーズ表示時間（秒）
+  SIZE_PERCENT: 25, // 画面高さの25%
+} as const;
+
+export const BOXER_IMAGES = {
+  BASE: '/boxer_base.png',
+  ROCK: '/boxer_gu.png',
+  SCISSORS: '/boxer_cho.png',
+  PAPER: '/boxer_pa.png',
+} as const;
+
 // LocalStorage キー
 export const STORAGE_KEYS = {
   CAMERA_VISIBLE: 'janken_camera_visible',
