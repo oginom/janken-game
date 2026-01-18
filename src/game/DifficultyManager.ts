@@ -70,14 +70,35 @@ export class DifficultyManager {
       return config;
     }
 
-    // レベルが最大を超えた場合、最後の設定をベースに速度をさらに上げる
+    // レベルが最大を超えた場合、速度とインターバルを調整
     const maxConfig = DIFFICULTY_TABLE[DIFFICULTY_TABLE.length - 1];
     const extraLevels = this.currentLevel - maxConfig.level;
+
+    // インターバル: a + b/(x + c) 形式で0.5秒に漸近
+    // maxConfig時（extraLevels=0）のインターバル: maxConfigInterval = a + b/(1 - c)
+    // 最小値（漸近値）: a = 0.5
+    // maxConfig時の傾き: d/dx[a + b/(x+c)] = -b/(x+c)² で x=1 のとき -0.1
+    // よって: -b/(1+c)² = -0.1 → b = 0.1*(1+c)²
+    // また: a + b/(1+c) = 1.0 → 0.5 + b/(1+c) = 1.0 → b/(1+c) = 0.5
+    // b = 0.5*(1+c) より、0.1*(1+c)² = 0.5*(1+c)
+    // 0.1*(1+c) = 0.5 → 1+c = 5 → c = 4
+    const a = 0.5;
+    const c = 4;
+    const b = 0.5 * (1 + c); // b = 0.5 * 5 = 2.5
+    const x = extraLevels + 1; // extraLevels=0のとき x=1
+    const newInterval = a + b / (x + c);
+
+    // 速度: intervalの逆数に比例
+    // maxConfig時の速度: maxConfigSpeed
+    // maxConfig時のインターバル: maxConfigInterval
+    // newSpeed / maxConfigSpeed = maxConfigInterval / newInterval
+    const newSpeed = maxConfig.speed * (maxConfig.interval / newInterval);
+
     return {
       ...maxConfig,
       level: this.currentLevel,
-      speed: maxConfig.speed + extraLevels * 0.3, // レベル1ごとに0.3倍速くなる
-      interval: Math.max(0.5, maxConfig.interval - extraLevels * 0.1), // 最低0.5秒
+      speed: newSpeed,
+      interval: newInterval,
     };
   }
 
