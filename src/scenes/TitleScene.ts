@@ -155,8 +155,42 @@ export class TitleScene extends Scene {
     cameraToggle.style.width = '20px';
     cameraToggle.style.height = '20px';
     cameraToggle.style.cursor = 'pointer';
-    cameraToggle.addEventListener('change', () => {
+    cameraToggle.addEventListener('change', async () => {
       settingsManager.setCameraVisible(cameraToggle.checked);
+
+      // カメラ設定を即座に反映
+      if (cameraToggle.checked) {
+        // カメラON
+        try {
+          if (!this.handTracker) {
+            this.handTracker = new HandTracker(this.video);
+            await this.handTracker.init();
+          }
+          await this.handTracker.startCamera();
+
+          // 背景にカメラ映像を表示
+          if (this.background) {
+            this.background.enableCameraBackground();
+          }
+
+          console.log('カメラON: カメラ映像を表示');
+        } catch (error) {
+          console.error('カメラ起動エラー:', error);
+        }
+      } else {
+        // カメラOFF
+        if (this.handTracker) {
+          this.handTracker.dispose();
+          this.handTracker = null;
+        }
+
+        // 白背景に戻す
+        if (this.background) {
+          this.background.disableCameraBackground();
+        }
+
+        console.log('カメラOFF: 白背景を表示');
+      }
     });
 
     cameraToggleContainer.appendChild(cameraLabel);
