@@ -114,10 +114,10 @@ export class TitleScene extends Scene {
 
     if (isDebugMode) {
       notice.textContent =
-        'カメラON: 背景にカメラ映像を表示\nカメラOFF: 白い背景のみ表示\n\nジェスチャー認識で操作します\nグー・チョキ・パー\n\n🎮 デバッグモード: キーボード操作\n(1,2,3 = 左手 / 4,5,6 = 右手)';
+        'カメラON: 背景にカメラ映像を表示\nカメラOFF: 白い背景のみ表示\n\nグー・チョキ・パーを\nジェスチャー認識で操作します\n\n🎮 デバッグモード: キーボード操作\n(1,2,3 = 左手 / 4,5,6 = 右手)';
     } else {
       notice.textContent =
-        'カメラON: 背景にカメラ映像を表示\nカメラOFF: 白い背景のみ表示\n\nジェスチャー認識で操作します\nグー・チョキ・パー';
+        'カメラON: 背景にカメラ映像を表示\nカメラOFF: 白い背景のみ表示\n\nグー・チョキ・パーを\nジェスチャー認識で操作します';
     }
 
     notice.style.color = '#ffffff';
@@ -143,7 +143,7 @@ export class TitleScene extends Scene {
     cameraToggleContainer.style.alignItems = 'center';
 
     const cameraLabel = document.createElement('label');
-    cameraLabel.textContent = 'カメラを表示: ';
+    cameraLabel.textContent = 'カメラON/OFF: ';
     cameraLabel.style.color = '#ffffff';
     cameraLabel.style.fontSize = '16px';
     cameraLabel.style.marginRight = '10px';
