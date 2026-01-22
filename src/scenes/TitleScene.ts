@@ -147,26 +147,48 @@ export class TitleScene extends Scene {
     });
     this.uiContainer.appendChild(startButton);
 
-    // 注意書き
-    const notice = document.createElement('p');
+    // 操作説明テキスト
+    const gestureNotice = document.createElement('p');
     const isDebugMode = isKeyboardDebugMode();
 
     if (isDebugMode) {
-      notice.textContent =
-        'カメラON: 背景にカメラ映像を表示\nカメラOFF: 白い背景のみ表示\n\nグー・チョキ・パーを\nジェスチャー認識で操作します\n\n🎮 デバッグモード: キーボード操作\n(1,2,3 = 左手 / 4,5,6 = 右手)';
+      gestureNotice.textContent =
+        'グー・チョキ・パーを\nジェスチャー認識で操作します\n\n🎮 デバッグモード: キーボード操作\n(1,2,3 = 左手 / 4,5,6 = 右手)';
     } else {
-      notice.textContent =
-        'カメラON: 背景にカメラ映像を表示\nカメラOFF: 白い背景のみ表示\n\nグー・チョキ・パーを\nジェスチャー認識で操作します';
+      gestureNotice.textContent = 'グー・チョキ・パーを\nジェスチャー認識で操作します';
     }
 
-    notice.style.color = '#ffffff';
-    notice.style.fontSize = '14px';
-    notice.style.textAlign = 'center';
-    notice.style.whiteSpace = 'pre-line';
-    notice.style.textShadow = '2px 2px 4px rgba(0, 0, 0, 0.8)';
-    notice.style.marginBottom = '30px';
-    notice.style.lineHeight = '1.6';
-    this.uiContainer.appendChild(notice);
+    gestureNotice.style.color = '#ffffff';
+    gestureNotice.style.fontSize = '14px';
+    gestureNotice.style.textAlign = 'center';
+    gestureNotice.style.whiteSpace = 'pre-line';
+    gestureNotice.style.textShadow = '2px 2px 4px rgba(0, 0, 0, 0.8)';
+    gestureNotice.style.marginBottom = '20px';
+    gestureNotice.style.lineHeight = '1.6';
+    this.uiContainer.appendChild(gestureNotice);
+
+    // 説明画像
+    const instructionImage = document.createElement('img');
+    instructionImage.src = '/janbox_inst.gif';
+    instructionImage.alt = 'ゲームの説明';
+    instructionImage.style.maxWidth = '300px';
+    instructionImage.style.height = 'auto';
+    instructionImage.style.marginBottom = '20px';
+    instructionImage.style.borderRadius = '16px';
+    this.uiContainer.appendChild(instructionImage);
+
+    // カメラ設定の説明
+    const cameraNotice = document.createElement('p');
+    cameraNotice.textContent =
+      'カメラON: 背景にカメラ映像を表示\nカメラOFF: 白い背景のみ表示';
+    cameraNotice.style.color = '#ffffff';
+    cameraNotice.style.fontSize = '14px';
+    cameraNotice.style.textAlign = 'center';
+    cameraNotice.style.whiteSpace = 'pre-line';
+    cameraNotice.style.textShadow = '2px 2px 4px rgba(0, 0, 0, 0.8)';
+    cameraNotice.style.marginBottom = '20px';
+    cameraNotice.style.lineHeight = '1.6';
+    this.uiContainer.appendChild(cameraNotice);
 
     // 設定コンテナ（カメラと効果音）
     const settingsContainer = document.createElement('div');
