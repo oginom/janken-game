@@ -63,7 +63,7 @@ export class UIElements {
     const totalWidth = (this.maxLives - 1) * spacing + heartSize;
     const centerX = SCREEN.WIDTH / 2;
     const startX = centerX - totalWidth / 2 + heartSize / 2;
-    const startY = 600;
+    const startY = 630;
 
     for (let i = 0; i < this.maxLives; i++) {
       const material = new THREE.SpriteMaterial({
