@@ -43,9 +43,9 @@ export class AssetLoader {
     this.textures.set('frame-scissors', await this.loadTextureFromDataURL(placeholders.frames.scissors));
     this.textures.set('frame-paper', await this.loadTextureFromDataURL(placeholders.frames.paper));
 
-    // ハート
-    this.textures.set('heart-filled', await this.loadTextureFromDataURL(placeholders.hearts.filled));
-    this.textures.set('heart-empty', await this.loadTextureFromDataURL(placeholders.hearts.empty));
+    // ハート（実際の画像ファイルを使用）
+    this.textures.set('heart-filled', await this.loadTexture('/heart_full.png'));
+    this.textures.set('heart-empty', await this.loadTexture('/heart_null.png'));
 
     // 背景
     this.textures.set('background', await this.loadTextureFromDataURL(placeholders.background));
@@ -68,6 +68,24 @@ export class AssetLoader {
     return new Promise((resolve, reject) => {
       this.textureLoader.load(
         dataURL,
+        (texture) => {
+          texture.minFilter = THREE.LinearFilter;
+          texture.magFilter = THREE.LinearFilter;
+          resolve(texture);
+        },
+        undefined,
+        (error) => reject(error)
+      );
+    });
+  }
+
+  /**
+   * ファイルパスからテクスチャを読み込む
+   */
+  private loadTexture(path: string): Promise<THREE.Texture> {
+    return new Promise((resolve, reject) => {
+      this.textureLoader.load(
+        path,
         (texture) => {
           texture.minFilter = THREE.LinearFilter;
           texture.magFilter = THREE.LinearFilter;

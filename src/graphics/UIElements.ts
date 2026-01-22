@@ -58,10 +58,12 @@ export class UIElements {
    * ライフ表示用のスプライトを作成
    */
   private createLifeSprites(): void {
-    const heartSize = 40;
-    const spacing = 45;
-    const startX = 20;
-    const startY = 20;
+    const heartSize = 20;
+    const spacing = 25;
+    const totalWidth = (this.maxLives - 1) * spacing + heartSize;
+    const centerX = SCREEN.WIDTH / 2;
+    const startX = centerX - totalWidth / 2 + heartSize / 2;
+    const startY = 600;
 
     for (let i = 0; i < this.maxLives; i++) {
       const material = new THREE.SpriteMaterial({

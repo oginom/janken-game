@@ -69,6 +69,8 @@ export class TitleScene extends Scene {
       '/boxer_gu.png',
       '/boxer_cho.png',
       '/boxer_pa.png',
+      '/heart_full.png',
+      '/heart_null.png',
     ];
 
     imagePaths.forEach((path) => {
@@ -76,7 +78,7 @@ export class TitleScene extends Scene {
       img.src = path;
     });
 
-    console.log('タイトル画面: ボクサー画像をプリロード開始');
+    console.log('タイトル画面: ボクサー画像とハート画像をプリロード開始');
   }
 
   /**
