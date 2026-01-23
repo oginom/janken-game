@@ -16,7 +16,7 @@ export class Background {
     // 背景プレーンの作成
     const bgGeometry = new THREE.PlaneGeometry(SCREEN.WIDTH, SCREEN.HEIGHT);
     const bgMaterial = new THREE.MeshBasicMaterial({
-      color: 0xffffff, // 初期は白
+      color: 0x000000, // 初期は黒
       transparent: false,
     });
     this.backgroundPlane = new THREE.Mesh(bgGeometry, bgMaterial);
@@ -92,7 +92,7 @@ export class Background {
 
     const bgMaterial = this.backgroundPlane.material as THREE.MeshBasicMaterial;
     bgMaterial.map = null;
-    bgMaterial.color.setHex(0xffffff); // 白背景
+    bgMaterial.color.setHex(0x000000); // 黒背景
     bgMaterial.needsUpdate = true;
 
     if (this.videoTexture) {
