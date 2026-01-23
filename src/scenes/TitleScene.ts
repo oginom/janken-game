@@ -116,10 +116,10 @@ export class TitleScene extends Scene {
     const title = document.createElement('h1');
     title.textContent = 'じゃんけんボクサー';
     title.style.color = '#ffffff';
-    title.style.fontSize = '48px';
+    title.style.fontSize = '36px';
     title.style.fontWeight = 'bold';
     title.style.textShadow = '4px 4px 8px rgba(0, 0, 0, 0.8)';
-    title.style.marginBottom = '60px';
+    title.style.marginBottom = '40px';
     this.uiContainer.appendChild(title);
 
     // ゲーム開始ボタン
@@ -173,7 +173,7 @@ export class TitleScene extends Scene {
     const instructionImage = document.createElement('img');
     instructionImage.src = '/janbox_inst.gif';
     instructionImage.alt = 'ゲームの説明';
-    instructionImage.style.maxWidth = '300px';
+    instructionImage.style.maxWidth = '150px';
     instructionImage.style.height = 'auto';
     instructionImage.style.marginBottom = '20px';
     instructionImage.style.borderRadius = '16px';
