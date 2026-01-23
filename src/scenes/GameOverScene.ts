@@ -17,8 +17,7 @@ export class GameOverScene extends Scene {
   constructor(video: HTMLVideoElement, finalScore: number, highScore: number) {
     super();
     this.video = video;
-    const showCamera = settingsManager.getCameraVisible();
-    this.background = new Background(video, showCamera);
+    this.background = new Background(video);
     this.finalScore = finalScore;
     this.highScore = highScore;
   }

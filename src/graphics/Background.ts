@@ -9,11 +9,9 @@ export class Background {
   private overlayPlane: THREE.Mesh;
   private videoTexture: THREE.VideoTexture | null = null;
   private video: HTMLVideoElement;
-  private showCamera: boolean;
 
-  constructor(video: HTMLVideoElement, showCamera: boolean = true) {
+  constructor(video: HTMLVideoElement) {
     this.video = video;
-    this.showCamera = showCamera;
 
     // 背景プレーンの作成
     const bgGeometry = new THREE.PlaneGeometry(SCREEN.WIDTH, SCREEN.HEIGHT);
@@ -39,11 +37,6 @@ export class Background {
    * カメラフィードを背景に設定（初期化時に自動的に呼ばれる）
    */
   enableCameraBackground(): void {
-    if (!this.showCamera) {
-      // カメラ非表示の場合は白背景のまま
-      return;
-    }
-
     if (!this.video.srcObject) {
       console.warn('Camera video not initialized');
       return;

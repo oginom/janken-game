@@ -45,7 +45,7 @@ export class GameScene extends Scene {
     this.video = video;
     this.showsCamera = settingsManager.getCameraVisible();
     this.usesGesture = !isKeyboardDebugMode();
-    this.background = new Background(video, this.showsCamera);
+    this.background = new Background(video);
     this.gameState = gameState;
     this.difficultyManager = new DifficultyManager();
     this.soundManager = SoundManager.getInstance();

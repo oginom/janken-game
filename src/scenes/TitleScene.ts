@@ -17,8 +17,7 @@ export class TitleScene extends Scene {
   constructor(video: HTMLVideoElement) {
     super();
     this.video = video;
-    const showCamera = settingsManager.getCameraVisible();
-    this.background = new Background(video, showCamera);
+    this.background = new Background(video);
   }
 
   /**
