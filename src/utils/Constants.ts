@@ -16,7 +16,7 @@ export const GAME_CONFIG = {
   INITIAL_LIVES: 3,
   INITIAL_SCORE: 0,
   SCORE_PER_WIN: 10,
-  LIFE_LOSS_ON_LOSE: 3,
+  LIFE_LOSS_ON_LOSE: 1,
   LIFE_LOSS_ON_DRAW: 1,
   DIFFICULTY_INTERVAL: 5, // 5個倒すごとに難易度上昇
 } as const;
@@ -106,7 +106,7 @@ export const ANIMATION = {
 
 // 背景設定
 export const BACKGROUND = {
-  OVERLAY_ALPHA: 0.5, // 白い半透明オーバーレイの透明度
+  OVERLAY_ALPHA: 0.25, // 白い半透明オーバーレイの透明度
   COLOR: 0xffffff, // オーバーレイの色（白）
 } as const;
 
