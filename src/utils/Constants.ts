@@ -132,6 +132,15 @@ export const BOXER_SPRITE = {
   SIZE_PERCENT: 25, // 画面高さの25%
 } as const;
 
+// Staggered spawn pattern configuration
+export const STAGGERED_PATTERN_CONFIG = {
+  MIN_LEVEL: 15, // Minimum level to enable pattern
+  TRIGGER_MIN: 30, // Minimum enemies between patterns
+  TRIGGER_MAX: 60, // Maximum enemies between patterns
+  SPAWN_INTERVAL: 0.5, // Seconds between alternating spawns
+  TOTAL_SPAWNS: 10, // Total individual spawns (4 pairs)
+} as const;
+
 export const BOXER_IMAGES = {
   BASE: '/boxer_base.png',
   ROCK: '/boxer_gu.png',

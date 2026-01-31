@@ -10,7 +10,7 @@ import { CollisionDetector } from '../game/CollisionDetector';
 import { HandTracker } from '../game/HandTracker';
 import { SoundManager } from '../audio/SoundManager';
 import type { HandType } from '../types';
-import { PLAYER_HAND_POSITION, GAME_CONFIG } from '../utils/Constants';
+import { PLAYER_HAND_POSITION, GAME_CONFIG, STAGGERED_PATTERN_CONFIG } from '../utils/Constants';
 import { settingsManager, isKeyboardDebugMode } from '../utils/Settings';
 
 /**
@@ -34,6 +34,12 @@ export class GameScene extends Scene {
 
   // 敵生成のタイマー
   private spawnTimer: number = 0;
+
+  // Staggered spawn pattern state
+  private staggeredPatternActive: boolean = false;
+  private staggeredPatternCounter: number = 0; // 0-7 (8 spawns total)
+  private staggeredPatternNextSide: 'left' | 'right' = 'right';
+  private nextPatternTriggerCount: number = 0; // Next defeated count to trigger
 
   // カメラ表示フラグとジェスチャー認識フラグ
   private showsCamera: boolean;
@@ -204,7 +210,16 @@ export class GameScene extends Scene {
   private spawnNextEnemy(): void {
     if (!this.enemyManager) return;
 
-    const nextHand = this.difficultyManager.generateNextHand();
+    let nextHand: { leftHand: HandType | null; rightHand: HandType | null };
+
+    if (this.staggeredPatternActive) {
+      // Pattern mode: spawn single alternating hand
+      nextHand = this.generateStaggeredHand();
+    } else {
+      // Normal mode: use difficulty manager
+      nextHand = this.difficultyManager.generateNextHand();
+    }
+
     const speed = this.difficultyManager.getCurrentSpeed();
 
     if (nextHand.leftHand) {
@@ -217,8 +232,78 @@ export class GameScene extends Scene {
 
     console.log(`敵を生成: 左=${nextHand.leftHand}, 右=${nextHand.rightHand}, 速度=${speed.toFixed(1)}`);
 
+    // Progress pattern if active
+    if (this.staggeredPatternActive) {
+      this.progressStaggeredPattern();
+    }
+
     // スポーンタイマーをリセット
     this.spawnTimer = 0;
+  }
+
+  /**
+   * 次のパターン発動カウントを計算（ランダム28-32）
+   */
+  private calculateNextTriggerCount(currentCount: number): number {
+    const min = STAGGERED_PATTERN_CONFIG.TRIGGER_MIN;
+    const max = STAGGERED_PATTERN_CONFIG.TRIGGER_MAX;
+    const randomOffset = Math.floor(Math.random() * (max - min + 1)) + min;
+    return currentCount + randomOffset;
+  }
+
+  /**
+   * ずれスポーンパターンを開始
+   */
+  private startStaggeredPattern(): void {
+    this.staggeredPatternActive = true;
+    this.staggeredPatternCounter = 0;
+    this.staggeredPatternNextSide = 'right'; // Always start with right
+    console.log('⚡ Staggered spawn pattern activated!');
+  }
+
+  /**
+   * パターン中のハンド生成（片手のみ、ランダムタイプ）
+   */
+  private generateStaggeredHand(): { leftHand: HandType | null; rightHand: HandType | null } {
+    const handTypes: HandType[] = ['rock', 'scissors', 'paper'];
+    const randomType = handTypes[Math.floor(Math.random() * handTypes.length)];
+
+    return {
+      leftHand: this.staggeredPatternNextSide === 'left' ? randomType : null,
+      rightHand: this.staggeredPatternNextSide === 'right' ? randomType : null,
+    };
+  }
+
+  /**
+   * パターンを進行（カウンター増加、サイド切替）
+   */
+  private progressStaggeredPattern(): void {
+    this.staggeredPatternCounter++;
+
+    // Alternate: right -> left -> right -> left...
+    this.staggeredPatternNextSide =
+      this.staggeredPatternNextSide === 'right' ? 'left' : 'right';
+
+    // Check if pattern complete (8 spawns)
+    if (this.staggeredPatternCounter >= STAGGERED_PATTERN_CONFIG.TOTAL_SPAWNS) {
+      this.endStaggeredPattern();
+    }
+  }
+
+  /**
+   * パターン終了、通常スポーンに戻る
+   */
+  private endStaggeredPattern(): void {
+    this.staggeredPatternActive = false;
+    this.staggeredPatternCounter = 0;
+    this.staggeredPatternNextSide = 'right';
+    this.spawnTimer = 0; // Reset to avoid immediate spawn
+
+    // Calculate next trigger (random 28-32 enemies from now)
+    const currentCount = this.difficultyManager.getDefeatedCount();
+    this.nextPatternTriggerCount = this.calculateNextTriggerCount(currentCount);
+
+    console.log(`✓ Pattern complete. Next pattern at ${this.nextPatternTriggerCount} enemies`);
   }
 
   /**
@@ -308,6 +393,24 @@ export class GameScene extends Scene {
               this.difficultyManager.getDefeatedCount()
             );
           }
+
+          // Check if staggered pattern should trigger
+          const defeatedCount = this.difficultyManager.getDefeatedCount();
+          const currentLevel = this.difficultyManager.getCurrentLevel();
+
+          // Initialize trigger count on first enemy
+          if (this.nextPatternTriggerCount === 0) {
+            this.nextPatternTriggerCount = this.calculateNextTriggerCount(defeatedCount);
+          }
+
+          // Trigger pattern if conditions met
+          if (
+            currentLevel >= STAGGERED_PATTERN_CONFIG.MIN_LEVEL &&
+            !this.staggeredPatternActive &&
+            defeatedCount >= this.nextPatternTriggerCount
+          ) {
+            this.startStaggeredPattern();
+          }
         }
       );
     }
@@ -319,7 +422,12 @@ export class GameScene extends Scene {
 
     // 敵の生成タイマー
     this.spawnTimer += deltaTime;
-    const interval = this.difficultyManager.getCurrentInterval();
+
+    // Use fixed interval during pattern, normal interval otherwise
+    const interval = this.staggeredPatternActive
+      ? STAGGERED_PATTERN_CONFIG.SPAWN_INTERVAL
+      : this.difficultyManager.getCurrentInterval();
+
     if (this.spawnTimer >= interval) {
       this.spawnNextEnemy();
     }
@@ -335,6 +443,11 @@ export class GameScene extends Scene {
       this.handTracker.stop();
       this.handTracker = null;
     }
+
+    // Reset pattern state on scene disposal
+    this.staggeredPatternActive = false;
+    this.staggeredPatternCounter = 0;
+    this.nextPatternTriggerCount = 0;
 
     // キーボードイベントリスナーを削除
     if ((this as any)._keydownListener) {
