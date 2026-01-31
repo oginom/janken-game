@@ -41,12 +41,14 @@ export class TitleScene extends Scene {
     const soundManager = SoundManager.getInstance();
     soundManager.playBGM();
 
-    // カメラ表示が有効な場合、カメラを起動
+    // MediaPipeモデルを事前にダウンロード（カメラ設定に関わらず）
     const showCamera = settingsManager.getCameraVisible();
-    if (showCamera) {
-      try {
-        this.handTracker = new HandTracker(this.video);
-        await this.handTracker.init();
+    try {
+      this.handTracker = new HandTracker(this.video);
+      await this.handTracker.init(); // モデルをダウンロード
+
+      // カメラ表示が有効な場合のみカメラを起動
+      if (showCamera) {
         await this.handTracker.startCamera();
 
         // 背景にカメラ映像を表示
@@ -54,10 +56,12 @@ export class TitleScene extends Scene {
           this.background.enableCameraBackground();
         }
 
-        console.log('タイトル画面: カメラ起動完了');
-      } catch (error) {
-        console.error('タイトル画面: カメラ起動エラー:', error);
+        console.log('タイトル画面: MediaPipeモデルダウンロード完了、カメラ起動完了');
+      } else {
+        console.log('タイトル画面: MediaPipeモデルダウンロード完了（カメラは未起動）');
       }
+    } catch (error) {
+      console.error('タイトル画面: MediaPipe初期化エラー:', error);
     }
 
     // UI要素を作成
@@ -233,10 +237,8 @@ export class TitleScene extends Scene {
       if (cameraToggle.checked) {
         // カメラ表示ON
         try {
-          // カメラがまだ起動していない場合は起動
-          if (!this.handTracker) {
-            this.handTracker = new HandTracker(this.video);
-            await this.handTracker.init();
+          // HandTrackerは既にinit()済みなので、カメラ起動のみ行う
+          if (this.handTracker) {
             await this.handTracker.startCamera();
           }
 
@@ -245,29 +247,17 @@ export class TitleScene extends Scene {
             this.background.enableCameraBackground();
           }
 
-          console.log('カメラ表示ON: カメラ映像を表示（認識は継続）');
+          console.log('カメラ表示ON: カメラ映像を表示');
         } catch (error) {
           console.error('カメラ起動エラー:', error);
         }
       } else {
-        // カメラ表示OFF（カメラストリームは起動したまま、表示だけオフ）
-        // カメラがまだ起動していない場合は起動（ジェスチャー認識のため）
-        if (!this.handTracker) {
-          try {
-            this.handTracker = new HandTracker(this.video);
-            await this.handTracker.init();
-            await this.handTracker.startCamera();
-          } catch (error) {
-            console.error('カメラ起動エラー:', error);
-          }
-        }
-
-        // 白背景に戻す（カメラ映像を非表示）
+        // カメラ表示OFF（白背景に戻す）
         if (this.background) {
           this.background.disableCameraBackground();
         }
 
-        console.log('カメラ表示OFF: 白背景を表示（認識は継続）');
+        console.log('カメラ表示OFF: 白背景を表示');
       }
     });
 

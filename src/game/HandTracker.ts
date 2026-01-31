@@ -57,6 +57,12 @@ export class HandTracker {
    * カメラを開始
    */
   async startCamera(): Promise<void> {
+    // 既にカメラが起動している場合はスキップ
+    if (this.video.srcObject) {
+      console.log('カメラは既に起動しています');
+      return;
+    }
+
     try {
       console.log('カメラ起動中...');
 
