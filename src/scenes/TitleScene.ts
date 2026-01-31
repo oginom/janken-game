@@ -10,6 +10,7 @@ import { SoundManager } from '../audio/SoundManager';
 export class TitleScene extends Scene {
   private background: Background | null = null;
   private uiContainer: HTMLDivElement | null = null;
+  private creditModal: HTMLDivElement | null = null;
   private onStartCallback: (() => void) | null = null;
   private video: HTMLVideoElement;
   private handTracker: HandTracker | null = null;
@@ -311,8 +312,213 @@ export class TitleScene extends Scene {
     settingsContainer.appendChild(soundToggleContainer);
     this.uiContainer.appendChild(settingsContainer);
 
+    // クレジットボタン（画面下部に小さめに配置）
+    const creditButton = document.createElement('button');
+    creditButton.textContent = 'クレジット';
+    creditButton.style.fontSize = '14px';
+    creditButton.style.padding = '8px 20px';
+    creditButton.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+    creditButton.style.color = '#ffffff';
+    creditButton.style.border = '1px solid rgba(255, 255, 255, 0.5)';
+    creditButton.style.borderRadius = '4px';
+    creditButton.style.cursor = 'pointer';
+    creditButton.style.pointerEvents = 'auto';
+    creditButton.style.marginTop = '30px';
+    creditButton.style.fontWeight = 'normal';
+    creditButton.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.3)';
+    creditButton.addEventListener('click', () => {
+      this.openCreditModal();
+    });
+    creditButton.addEventListener('mouseenter', () => {
+      creditButton.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+    });
+    creditButton.addEventListener('mouseleave', () => {
+      creditButton.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+    });
+    this.uiContainer.appendChild(creditButton);
+
     // DOMに追加
     document.body.appendChild(this.uiContainer);
+  }
+
+  /**
+   * クレジットモーダルを作成
+   */
+  private createCreditModal(): HTMLDivElement {
+    // モーダル背景
+    const modal = document.createElement('div');
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    modal.style.display = 'none';
+    modal.style.justifyContent = 'center';
+    modal.style.alignItems = 'center';
+    modal.style.zIndex = '1000';
+    modal.style.pointerEvents = 'auto';
+
+    // モーダルコンテンツ
+    const content = document.createElement('div');
+    content.style.backgroundColor = '#ffffff';
+    content.style.padding = '30px';
+    content.style.borderRadius = '12px';
+    content.style.maxWidth = '400px';
+    content.style.width = '90%';
+    content.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.3)';
+    content.style.position = 'relative';
+
+    // 閉じるボタン
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '×';
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '10px';
+    closeButton.style.fontSize = '24px';
+    closeButton.style.width = '30px';
+    closeButton.style.height = '30px';
+    closeButton.style.border = 'none';
+    closeButton.style.backgroundColor = 'transparent';
+    closeButton.style.color = '#666666';
+    closeButton.style.cursor = 'pointer';
+    closeButton.style.padding = '0';
+    closeButton.style.lineHeight = '1';
+    closeButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.closeCreditModal();
+    });
+    closeButton.addEventListener('mouseenter', () => {
+      closeButton.style.color = '#000000';
+    });
+    closeButton.addEventListener('mouseleave', () => {
+      closeButton.style.color = '#666666';
+    });
+    content.appendChild(closeButton);
+
+    // タイトル
+    const title = document.createElement('h2');
+    title.textContent = 'クレジット';
+    title.style.fontSize = '24px';
+    title.style.fontWeight = 'bold';
+    title.style.marginBottom = '20px';
+    title.style.color = '#333333';
+    title.style.textAlign = 'center';
+    content.appendChild(title);
+
+    // クレジット情報（表形式）
+    const creditInfo = document.createElement('div');
+    creditInfo.style.fontSize = '15px';
+    creditInfo.style.color = '#333333';
+
+    // 制作セクション
+    const creatorRow = document.createElement('div');
+    creatorRow.style.display = 'flex';
+    creatorRow.style.marginBottom = '20px';
+    creatorRow.style.paddingBottom = '15px';
+    creatorRow.style.borderBottom = '1px solid #e0e0e0';
+
+    const creatorLabel = document.createElement('div');
+    creatorLabel.textContent = '制作';
+    creatorLabel.style.fontWeight = 'bold';
+    creatorLabel.style.minWidth = '100px';
+    creatorLabel.style.color = '#555555';
+    creatorRow.appendChild(creatorLabel);
+
+    const creatorValue = document.createElement('div');
+    creatorValue.style.flex = '1';
+    creatorValue.innerHTML = 'えむおぎ<br>';
+    const twitterLink = document.createElement('a');
+    twitterLink.textContent = '@emuogi';
+    twitterLink.href = 'https://x.com/emuogi';
+    twitterLink.target = '_blank';
+    twitterLink.rel = 'noopener noreferrer';
+    twitterLink.style.color = '#1da1f2';
+    twitterLink.style.textDecoration = 'none';
+    twitterLink.style.fontSize = '14px';
+    twitterLink.addEventListener('mouseenter', () => {
+      twitterLink.style.textDecoration = 'underline';
+    });
+    twitterLink.addEventListener('mouseleave', () => {
+      twitterLink.style.textDecoration = 'none';
+    });
+    creatorValue.appendChild(twitterLink);
+    creatorRow.appendChild(creatorValue);
+    creditInfo.appendChild(creatorRow);
+
+    // BGM素材セクション
+    const bgmRow = document.createElement('div');
+    bgmRow.style.display = 'flex';
+    bgmRow.style.marginBottom = '20px';
+    bgmRow.style.paddingBottom = '15px';
+    bgmRow.style.borderBottom = '1px solid #e0e0e0';
+
+    const bgmLabel = document.createElement('div');
+    bgmLabel.textContent = 'BGM素材';
+    bgmLabel.style.fontWeight = 'bold';
+    bgmLabel.style.minWidth = '100px';
+    bgmLabel.style.color = '#555555';
+    bgmRow.appendChild(bgmLabel);
+
+    const bgmValue = document.createElement('div');
+    bgmValue.style.flex = '1';
+    bgmValue.innerHTML = 'Kei Morimoto様<br><span style="font-size: 14px; color: #666666;">"COLORS"</span>';
+    bgmRow.appendChild(bgmValue);
+    creditInfo.appendChild(bgmRow);
+
+    // 効果音素材セクション
+    const seRow = document.createElement('div');
+    seRow.style.display = 'flex';
+
+    const seLabel = document.createElement('div');
+    seLabel.textContent = '効果音素材';
+    seLabel.style.fontWeight = 'bold';
+    seLabel.style.minWidth = '100px';
+    seLabel.style.color = '#555555';
+    seRow.appendChild(seLabel);
+
+    const seValue = document.createElement('div');
+    seValue.style.flex = '1';
+    seValue.textContent = '効果音ラボ様';
+    seRow.appendChild(seValue);
+    creditInfo.appendChild(seRow);
+
+    content.appendChild(creditInfo);
+    modal.appendChild(content);
+
+    // 背景クリックで閉じる
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        this.closeCreditModal();
+      }
+    });
+
+    // コンテンツクリックでイベント伝播を止める
+    content.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+
+    return modal;
+  }
+
+  /**
+   * クレジットモーダルを開く
+   */
+  private openCreditModal(): void {
+    if (!this.creditModal) {
+      this.creditModal = this.createCreditModal();
+      document.body.appendChild(this.creditModal);
+    }
+    this.creditModal.style.display = 'flex';
+  }
+
+  /**
+   * クレジットモーダルを閉じる
+   */
+  private closeCreditModal(): void {
+    if (this.creditModal) {
+      this.creditModal.style.display = 'none';
+    }
   }
 
   /**
@@ -350,6 +556,11 @@ export class TitleScene extends Scene {
     if (this.uiContainer && this.uiContainer.parentElement) {
       this.uiContainer.parentElement.removeChild(this.uiContainer);
       this.uiContainer = null;
+    }
+
+    if (this.creditModal && this.creditModal.parentElement) {
+      this.creditModal.parentElement.removeChild(this.creditModal);
+      this.creditModal = null;
     }
   }
 }
