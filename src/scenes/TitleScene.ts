@@ -36,6 +36,10 @@ export class TitleScene extends Scene {
     // 効果音を事前にプリロード
     this.preloadSounds();
 
+    // BGMを開始
+    const soundManager = SoundManager.getInstance();
+    soundManager.playBGM();
+
     // カメラ表示が有効な場合、カメラを起動
     const showCamera = settingsManager.getCameraVisible();
     if (showCamera) {
@@ -136,6 +140,10 @@ export class TitleScene extends Scene {
     startButton.style.fontWeight = 'bold';
     startButton.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
     startButton.addEventListener('click', () => {
+      // ブラウザの自動再生ポリシー対策：ユーザーインタラクション時にBGMを確実に再生
+      const soundManager = SoundManager.getInstance();
+      soundManager.playBGM();
+
       if (this.onStartCallback) {
         this.onStartCallback();
       }
@@ -181,7 +189,7 @@ export class TitleScene extends Scene {
     // カメラ設定の説明
     const cameraNotice = document.createElement('p');
     cameraNotice.textContent =
-      'カメラON: 背景にカメラ映像を表示\nカメラOFF: 白い背景のみ表示';
+      'カメラ ON: 背景にカメラ映像を表示\nカメラ OFF: 白い背景のみ表示';
     cameraNotice.style.color = '#ffffff';
     cameraNotice.style.fontSize = '14px';
     cameraNotice.style.textAlign = 'center';
@@ -205,7 +213,7 @@ export class TitleScene extends Scene {
     cameraToggleContainer.style.alignItems = 'center';
 
     const cameraLabel = document.createElement('label');
-    cameraLabel.textContent = 'カメラON/OFF: ';
+    cameraLabel.textContent = 'カメラ ON: ';
     cameraLabel.style.color = '#ffffff';
     cameraLabel.style.fontSize = '16px';
     cameraLabel.style.marginRight = '10px';
@@ -271,7 +279,7 @@ export class TitleScene extends Scene {
     soundToggleContainer.style.alignItems = 'center';
 
     const soundLabel = document.createElement('label');
-    soundLabel.textContent = '効果音: ';
+    soundLabel.textContent = 'BGM・効果音: ';
     soundLabel.style.color = '#ffffff';
     soundLabel.style.fontSize = '16px';
     soundLabel.style.marginRight = '10px';
@@ -285,6 +293,14 @@ export class TitleScene extends Scene {
     soundToggle.style.cursor = 'pointer';
     soundToggle.addEventListener('change', () => {
       settingsManager.setSoundEnabled(soundToggle.checked);
+
+      // BGMも効果音設定に連動させる
+      const soundManager = SoundManager.getInstance();
+      if (soundToggle.checked) {
+        soundManager.resumeBGM();
+      } else {
+        soundManager.pauseBGM();
+      }
     });
 
     soundToggleContainer.appendChild(soundLabel);

@@ -12,6 +12,7 @@ export class SoundManager {
   private audioContext: AudioContext;
   private sounds: Map<SoundType, AudioBuffer> = new Map();
   private initialized = false;
+  private bgmAudio: HTMLAudioElement | null = null;
 
   private constructor() {
     this.audioContext = new AudioContext();
@@ -90,9 +91,69 @@ export class SoundManager {
   }
 
   /**
+   * BGMを開始
+   */
+  playBGM(): void {
+    // 既にBGMが再生中の場合はスキップ
+    if (this.bgmAudio && !this.bgmAudio.paused) {
+      return;
+    }
+
+    // BGMオーディオ要素を初期化
+    if (!this.bgmAudio) {
+      this.bgmAudio = new Audio('/COLORS_2.mp3');
+      this.bgmAudio.loop = true;
+      this.bgmAudio.volume = 0.5; // ボリュームを50%に設定
+    }
+
+    // 効果音が有効な場合のみ再生
+    if (settingsManager.getSoundEnabled()) {
+      this.bgmAudio.play().catch((error) => {
+        console.error('BGM再生エラー:', error);
+      });
+    }
+  }
+
+  /**
+   * BGMを停止
+   */
+  stopBGM(): void {
+    if (this.bgmAudio) {
+      this.bgmAudio.pause();
+      this.bgmAudio.currentTime = 0;
+    }
+  }
+
+  /**
+   * BGMの一時停止
+   */
+  pauseBGM(): void {
+    if (this.bgmAudio) {
+      this.bgmAudio.pause();
+    }
+  }
+
+  /**
+   * BGMの再開
+   */
+  resumeBGM(): void {
+    if (this.bgmAudio && this.bgmAudio.paused) {
+      if (settingsManager.getSoundEnabled()) {
+        this.bgmAudio.play().catch((error) => {
+          console.error('BGM再開エラー:', error);
+        });
+      }
+    }
+  }
+
+  /**
    * リソースの破棄
    */
   dispose(): void {
+    this.stopBGM();
+    if (this.bgmAudio) {
+      this.bgmAudio = null;
+    }
     this.sounds.clear();
     this.audioContext.close();
   }
