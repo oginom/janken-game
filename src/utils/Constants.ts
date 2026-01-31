@@ -115,7 +115,6 @@ export const CAMERA_CONFIG = {
   WIDTH: 640,
   HEIGHT: 480,
   FPS: 30,
-  RECOGNITION_INTERVAL_MS: 100, // ジェスチャー認識の処理間隔（100ms = 約10fps）
 } as const;
 
 // MediaPipe ジェスチャー名マッピング
