@@ -12,6 +12,9 @@ export class HandTracker {
   private isRunning: boolean = false;
   private lastVideoTime: number = -1;
 
+  // 時間ベースの間引き用
+  private lastRecognitionTime: number = 0;
+
   // 認識された手の状態
   private leftHandType: HandType | null = null;
   private rightHandType: HandType | null = null;
@@ -106,37 +109,49 @@ export class HandTracker {
 
     const nowInMs = Date.now();
 
-    // ビデオが新しいフレームを持っている場合のみ処理
-    if (this.video.currentTime !== this.lastVideoTime) {
-      this.lastVideoTime = this.video.currentTime;
+    // 時間ベースの間引き: 指定間隔以上経過していない場合は早期リターン
+    if (nowInMs - this.lastRecognitionTime < CAMERA_CONFIG.RECOGNITION_INTERVAL_MS) {
+      requestAnimationFrame(this.processFrame);
+      return;
+    }
 
-      // ジェスチャー認識実行
-      const results = this.gestureRecognizer.recognizeForVideo(this.video, nowInMs);
+    // ビデオが新しいフレームを持っていない場合は早期リターン
+    if (this.video.currentTime === this.lastVideoTime) {
+      requestAnimationFrame(this.processFrame);
+      return;
+    }
 
-      // 結果をリセット
-      this.leftHandType = null;
-      this.rightHandType = null;
+    this.lastVideoTime = this.video.currentTime;
 
-      // 認識された手をチェック
-      if (results.gestures && results.gestures.length > 0) {
-        for (let i = 0; i < results.gestures.length; i++) {
-          const gestures = results.gestures[i];
-          const handedness = results.handednesses[i];
+    // ジェスチャー認識実行
+    const results = this.gestureRecognizer.recognizeForVideo(this.video, nowInMs);
 
-          if (gestures.length > 0 && handedness.length > 0) {
-            const gestureName = gestures[0].categoryName;
-            const handLabel = handedness[0].categoryName; // "Left" or "Right"
+    // 認識時刻を更新
+    this.lastRecognitionTime = nowInMs;
 
-            // ジェスチャーをHandTypeにマッピング
-            const handType = this.mapGestureToHandType(gestureName);
+    // 結果をリセット
+    this.leftHandType = null;
+    this.rightHandType = null;
 
-            if (handType) {
-              // MediaPipeの"Left"は実際のカメラでは右手（鏡像）
-              if (handLabel === 'Left') {
-                this.rightHandType = handType; // 鏡像なので右手
-              } else if (handLabel === 'Right') {
-                this.leftHandType = handType; // 鏡像なので左手
-              }
+    // 認識された手をチェック
+    if (results.gestures && results.gestures.length > 0) {
+      for (let i = 0; i < results.gestures.length; i++) {
+        const gestures = results.gestures[i];
+        const handedness = results.handednesses[i];
+
+        if (gestures.length > 0 && handedness.length > 0) {
+          const gestureName = gestures[0].categoryName;
+          const handLabel = handedness[0].categoryName; // "Left" or "Right"
+
+          // ジェスチャーをHandTypeにマッピング
+          const handType = this.mapGestureToHandType(gestureName);
+
+          if (handType) {
+            // MediaPipeの"Left"は実際のカメラでは右手（鏡像）
+            if (handLabel === 'Left') {
+              this.rightHandType = handType; // 鏡像なので右手
+            } else if (handLabel === 'Right') {
+              this.leftHandType = handType; // 鏡像なので左手
             }
           }
         }
