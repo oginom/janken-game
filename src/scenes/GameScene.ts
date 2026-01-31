@@ -84,6 +84,9 @@ export class GameScene extends Scene {
     this.uiElements.getLifeSprites().forEach((sprite) => {
       this.scene.add(sprite);
     });
+    this.uiElements.getTextSprites().forEach((sprite) => {
+      this.scene.add(sprite);
+    });
 
     // ゲーム状態の初期値でUIを更新
     this.uiElements.updateLives(this.gameState.getLives());
@@ -369,6 +372,9 @@ export class GameScene extends Scene {
 
     if (this.uiElements) {
       this.uiElements.getLifeSprites().forEach((sprite) => {
+        this.scene.remove(sprite);
+      });
+      this.uiElements.getTextSprites().forEach((sprite) => {
         this.scene.remove(sprite);
       });
       this.uiElements.dispose();

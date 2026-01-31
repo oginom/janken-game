@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { assetLoader } from '../assets/AssetLoader';
 import { SCREEN } from '../utils/Constants';
+import { TextSprite } from './TextSprite';
 
 /**
  * 画面座標(左上原点)をThree.js座標(中心原点)に変換
@@ -17,38 +18,40 @@ function screenToThreeCoords(x: number, y: number): { x: number; y: number } {
  */
 export class UIElements {
   private lifeSprites: THREE.Sprite[] = [];
-  private scoreText: HTMLDivElement;
-  private levelText: HTMLDivElement;
+  private scoreText: TextSprite;
+  private levelText: TextSprite;
   private maxLives: number;
 
   constructor(maxLives: number) {
     this.maxLives = maxLives;
 
-    // スコア表示用のHTML要素を作成
-    this.scoreText = document.createElement('div');
-    this.scoreText.style.position = 'absolute';
-    this.scoreText.style.top = '10px';
-    this.scoreText.style.right = '10px';
-    this.scoreText.style.color = '#ffffff';
-    this.scoreText.style.fontSize = '24px';
-    this.scoreText.style.fontWeight = 'bold';
-    this.scoreText.style.fontFamily = 'Arial, sans-serif';
-    this.scoreText.style.textShadow = '2px 2px 4px rgba(0, 0, 0, 0.8)';
-    this.scoreText.style.zIndex = '1000';
-    document.body.appendChild(this.scoreText);
+    // スコア表示用のTextSpriteを作成（右上に配置）
+    this.scoreText = new TextSprite('Score: 0', SCREEN.WIDTH - 10, 10, {
+      fontSize: 24,
+      color: '#ffffff',
+      fontFamily: 'Arial, sans-serif',
+      fontWeight: 'bold',
+      textShadow: true,
+      shadowColor: 'rgba(0, 0, 0, 0.8)',
+      shadowBlur: 4,
+      shadowOffsetX: 2,
+      shadowOffsetY: 2,
+      align: 'right',
+    });
 
-    // 難易度レベル表示用のHTML要素を作成
-    this.levelText = document.createElement('div');
-    this.levelText.style.position = 'absolute';
-    this.levelText.style.top = '40px';
-    this.levelText.style.right = '10px';
-    this.levelText.style.color = '#ffff00';
-    this.levelText.style.fontSize = '18px';
-    this.levelText.style.fontWeight = 'bold';
-    this.levelText.style.fontFamily = 'Arial, sans-serif';
-    this.levelText.style.textShadow = '2px 2px 4px rgba(0, 0, 0, 0.8)';
-    this.levelText.style.zIndex = '1000';
-    document.body.appendChild(this.levelText);
+    // 難易度レベル表示用のTextSpriteを作成（右上、スコアの下）
+    this.levelText = new TextSprite('Level 1', SCREEN.WIDTH - 10, 40, {
+      fontSize: 18,
+      color: '#ffff00',
+      fontFamily: 'Arial, sans-serif',
+      fontWeight: 'bold',
+      textShadow: true,
+      shadowColor: 'rgba(0, 0, 0, 0.8)',
+      shadowBlur: 4,
+      shadowOffsetX: 2,
+      shadowOffsetY: 2,
+      align: 'right',
+    });
 
     // ライフ表示用のスプライトを作成
     this.createLifeSprites();
@@ -96,15 +99,15 @@ export class UIElements {
    * スコア表示を更新
    */
   updateScore(score: number): void {
-    this.scoreText.textContent = `Score: ${score}`;
+    this.scoreText.setText(`Score: ${score}`);
   }
 
   /**
    * 難易度レベル表示を更新
    */
   updateLevel(level: number, _defeatedCount: number): void {
-    //this.levelText.textContent = `Level ${level} (${defeatedCount % 5}/5)`;
-    this.levelText.textContent = `Level ${level}`;
+    //this.levelText.setText(`Level ${level} (${defeatedCount % 5}/5)`);
+    this.levelText.setText(`Level ${level}`);
   }
 
   /**
@@ -115,10 +118,10 @@ export class UIElements {
   }
 
   /**
-   * スコアテキスト要素を取得
+   * テキストスプライトを取得
    */
-  getScoreElement(): HTMLDivElement {
-    return this.scoreText;
+  getTextSprites(): THREE.Sprite[] {
+    return [this.scoreText.getSprite(), this.levelText.getSprite()];
   }
 
   /**
@@ -128,8 +131,8 @@ export class UIElements {
     this.lifeSprites.forEach((sprite) => {
       sprite.visible = visible;
     });
-    this.scoreText.style.display = visible ? 'block' : 'none';
-    this.levelText.style.display = visible ? 'block' : 'none';
+    this.scoreText.setVisible(visible);
+    this.levelText.setVisible(visible);
   }
 
   /**
@@ -141,12 +144,7 @@ export class UIElements {
     });
     this.lifeSprites = [];
 
-    if (this.scoreText.parentElement) {
-      this.scoreText.parentElement.removeChild(this.scoreText);
-    }
-
-    if (this.levelText.parentElement) {
-      this.levelText.parentElement.removeChild(this.levelText);
-    }
+    this.scoreText.dispose();
+    this.levelText.dispose();
   }
 }
