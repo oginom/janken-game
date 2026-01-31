@@ -20,7 +20,7 @@ export class SettingsManager {
     const soundEnabled = localStorage.getItem(STORAGE_KEYS.SOUND_ENABLED);
 
     return {
-      cameraVisible: cameraVisible === 'true', // デフォルトはfalse
+      cameraVisible: cameraVisible !== 'false', // デフォルトはtrue（初回はnull）
       soundEnabled: soundEnabled !== 'false', // デフォルトはtrue（初回はnull）
     };
   }
